@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>0API.MONSTER</title>
     <link rel="shortcut icon" href="icon.png" type="image/png">
     <link rel="apple-touch-icon" href="icon.png">
@@ -14,7 +14,8 @@
 
         body {
             margin: 0;
-            overflow: hidden;
+            /* MOBILE FIX: removido overflow:hidden — impedia scroll em telas pequenas */
+            overflow-x: hidden;
             background-color: #050505;
             color: #fff;
             font-family: 'Rajdhani', sans-serif;
@@ -27,11 +28,14 @@
             position: relative;
             z-index: 10;
             pointer-events: none;
-            height: 100vh;
+            /* MOBILE FIX: 100dvh em vez de 100vh — corrige iOS Safari address bar */
+            min-height: 100dvh;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 2rem;
+            /* MOBILE FIX: padding responsivo com env() para safe area notch */
+            padding: clamp(1rem, 3vw, 2rem);
+            padding-bottom: calc(clamp(1rem, 3vw, 2rem) + env(safe-area-inset-bottom, 0px));
             background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.65) 100%);
             transition: transform 0.05s;
         }
@@ -76,6 +80,12 @@
             transform: translateY(-2px);
         }
 
+        /* MOBILE FIX: tap feedback para dispositivos touch */
+        .api-card:active {
+            border-color: rgba(255, 0, 255, 0.5);
+            box-shadow: 0 0 18px rgba(255, 0, 255, 0.25);
+        }
+
         .scanlines {
             position: fixed;
             inset: 0;
@@ -89,11 +99,16 @@
             opacity: 0.5;
         }
 
+        /* MOBILE FIX: corner marks ocultos em telas pequenas para não poluir */
         .corner { position: fixed; width: 28px; height: 28px; z-index: 15; pointer-events: none; }
         .corner-tl { top: 12px; left: 12px; border-top: 1px solid #0ff; border-left: 1px solid #0ff; }
         .corner-tr { top: 12px; right: 12px; border-top: 1px solid #0ff; border-right: 1px solid #0ff; }
         .corner-bl { bottom: 18px; left: 12px; border-bottom: 1px solid #0ff; border-left: 1px solid #0ff; }
         .corner-br { bottom: 18px; right: 12px; border-bottom: 1px solid #0ff; border-right: 1px solid #0ff; }
+
+        @media (max-width: 480px) {
+            .corner { display: none; }
+        }
 
         .instability-container {
             position: fixed;
@@ -123,8 +138,12 @@
             position: relative;
             overflow: hidden;
             box-shadow: 0 0 10px rgba(255,0,255,0.2);
-            padding: 14px 36px;
+            /* MOBILE FIX: padding responsivo + min-height 44px para touch target */
+            padding: clamp(10px, 2vw, 14px) clamp(20px, 5vw, 36px);
+            min-height: 44px;
             transition: all 0.2s ease;
+            /* MOBILE FIX: evita que texto quebre em telas muito pequenas */
+            white-space: nowrap;
         }
 
         .btn-overload::before {
@@ -157,11 +176,18 @@
             flex-direction: column;
             justify-content: center;
             align-items: flex-start;
-            padding: 8% 10%;
+            /* MOBILE FIX: padding responsivo no BSOD */
+            padding: clamp(1.5rem, 8%, 5rem) clamp(1rem, 10%, 6rem);
             cursor: none;
+            /* MOBILE FIX: scroll interno caso conteúdo exceda em telas muito pequenas */
+            overflow-y: auto;
         }
 
-        .bsod-face { font-size: 5rem; margin-bottom: 1.5rem; }
+        /* MOBILE FIX: bsod-face menor em mobile */
+        .bsod-face {
+            font-size: clamp(2.5rem, 12vw, 5rem);
+            margin-bottom: 1.5rem;
+        }
 
         @keyframes alarm-flash {
             0%, 100% { box-shadow: inset 0 0 0 0 transparent; }
@@ -172,11 +198,14 @@
 
         #system-status-text {
             display: inline-block;
-            min-width: 200px;
+            /* MOBILE FIX: min-width responsivo — 200px fixo causava overflow */
+            min-width: clamp(80px, 30vw, 200px);
+            max-width: 55vw;
             text-align: right;
             font-family: 'Share Tech Mono', monospace;
             white-space: nowrap;
             overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         @keyframes status-flicker {
@@ -192,6 +221,27 @@
         }
 
         .blink { animation: blink 1s step-end infinite; }
+
+        /* MOBILE FIX: estilos específicos para telas pequenas */
+        @media (max-width: 480px) {
+            /* Header compacto */
+            .header-logo { font-size: 1.1rem; letter-spacing: 0.1em; }
+            .header-status { font-size: 0.6rem; padding: 2px 8px; }
+
+            /* Grid de cards em coluna única com altura automática */
+            .api-card-desc { height: auto !important; min-height: 2rem; }
+
+            /* Footer empilhado */
+            .footer-inner {
+                flex-direction: column;
+                gap: 0.5rem;
+                align-items: flex-start;
+            }
+            .footer-right { text-align: left !important; }
+
+            /* BSOD title menor */
+            .bsod-title { font-size: 1.3rem !important; }
+        }
     </style>
 </head>
 <body>
@@ -214,20 +264,20 @@
     <!-- BSOD -->
     <div id="bsod-screen">
         <div class="bsod-face">:(</div>
-        <p class="text-4xl font-bold mb-4">MONSTER_CORE_MELTDOWN</p>
-        <p class="text-lg mb-8 leading-relaxed max-w-4xl opacity-90">
+        <p class="bsod-title text-2xl md:text-4xl font-bold mb-4">MONSTER_CORE_MELTDOWN</p>
+        <p class="text-sm md:text-lg mb-8 leading-relaxed max-w-4xl opacity-90">
             O núcleo do monster entrou em colapso irreversível.<br>
             Chaves corrompidas. Endpoints destruídos. Memória purgada.<br>
             0api.monster não pode ser contido.
         </p>
-        <div class="text-sm opacity-75 leading-loose">
+        <div class="text-xs md:text-sm opacity-75 leading-loose">
             <span id="bsod-progress">0</span>% purgado<br><br>
             Código: 0API_MONSTER_OVERRIDE_FAILED<br>
             Módulo: <span id="bsod-module">UNKNOWN</span><br>
             Falha em: monster_core.sys
         </div>
-        <p id="bsod-restart" class="text-sm mt-10 blink hidden">
-            Pressione qualquer tecla ou clique para reiniciar o monster…
+        <p id="bsod-restart" class="text-xs md:text-sm mt-8 blink hidden">
+            Pressione qualquer tecla ou toque para reiniciar o monster…
         </p>
     </div>
 
@@ -235,102 +285,103 @@
     <div id="main-interface">
 
         <!-- HEADER -->
-        <header class="flex justify-between items-center w-full max-w-7xl mx-auto pointer-events-auto">
-            <div class="text-2xl font-bold tracking-widest text-cyan-400 flex items-center gap-2">
+        <header class="flex justify-between items-center w-full max-w-7xl mx-auto pointer-events-auto gap-2">
+            <div class="header-logo text-xl md:text-2xl font-bold tracking-widest text-cyan-400 flex items-center gap-2 shrink-0">
                 0API <span class="text-fuchsia-500">//</span> MONSTER
                 <span id="extreme-badge"
                     class="text-xs border border-red-500 text-red-500 px-1 ml-2 hidden animate-pulse">
                     EXTREME
                 </span>
             </div>
-            <div class="inline-flex items-center px-4 py-1 border border-cyan-500/50 bg-cyan-900/20 text-xs font-mono tracking-widest rounded-sm">
-                <span class="text-gray-400 shrink-0">STATUS:</span>
-                <span id="system-status-text" class="text-cyan-300 font-bold ml-2">SECURE</span>
+            <div class="header-status inline-flex items-center px-3 py-1 border border-cyan-500/50 bg-cyan-900/20 text-xs font-mono tracking-widest rounded-sm shrink-0">
+                <span class="text-gray-400 shrink-0">SYS:</span>
+                <span id="system-status-text" class="text-cyan-300 font-bold ml-1">SECURE</span>
             </div>
         </header>
 
         <!-- CONTENT -->
-        <main class="flex-1 flex flex-col justify-center w-full max-w-6xl mx-auto px-4 pointer-events-auto z-20">
+        <main class="flex-1 flex flex-col justify-center w-full max-w-6xl mx-auto px-2 md:px-4 pointer-events-auto z-20 py-6">
 
-            <div class="text-center mb-10">
-                <h1 id="main-title" class="text-4xl md:text-6xl font-bold tracking-widest glitch-text text-white">
+            <div class="text-center mb-6 md:mb-10">
+                <h1 id="main-title" class="glitch-text text-white font-bold tracking-widest"
+                    style="font-size: clamp(1.8rem, 8vw, 3.75rem)">
                     0API <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-600">MONSTER</span>
                 </h1>
-                <p class="text-gray-400 font-mono mt-2 text-sm">
+                <p class="text-gray-400 font-mono mt-2 text-xs md:text-sm">
                     0api.monster &bull; 6 endpoints ativos &bull; acesso restrito
                 </p>
             </div>
 
             <!-- API GRID -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 w-full">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5 w-full">
 
-                <div class="glass-panel api-card p-5 group relative overflow-hidden cursor-crosshair">
+                <div class="glass-panel api-card p-4 md:p-5 group relative overflow-hidden cursor-crosshair">
                     <div class="absolute top-0 left-0 w-full h-0.5 bg-cyan-500 group-hover:bg-fuchsia-500 transition-colors"></div>
                     <div class="flex justify-between items-start mb-2">
-                        <h3 class="font-mono text-xl text-cyan-300">/v1/auth</h3>
-                        <span class="text-[10px] px-2 py-0.5 border border-green-500 text-green-400 rounded-sm">ONLINE</span>
+                        <h3 class="font-mono text-lg md:text-xl text-cyan-300">/v1/auth</h3>
+                        <span class="text-[10px] px-2 py-0.5 border border-green-500 text-green-400 rounded-sm shrink-0 ml-2">ONLINE</span>
                     </div>
-                    <p class="text-xs text-gray-400 mb-4 h-8">Identidade, tokens JWT e matriz de permissões.</p>
+                    <p class="api-card-desc text-xs text-gray-400 mb-4">Identidade, tokens JWT e matriz de permissões.</p>
                     <div class="flex justify-between font-mono text-[10px] text-gray-500 border-t border-gray-800 pt-2">
                         <span>LATENCY: 12ms</span><span>REQ: 45k/s</span>
                     </div>
                 </div>
 
-                <div class="glass-panel api-card p-5 group relative overflow-hidden cursor-crosshair">
+                <div class="glass-panel api-card p-4 md:p-5 group relative overflow-hidden cursor-crosshair">
                     <div class="absolute top-0 left-0 w-full h-0.5 bg-cyan-500 group-hover:bg-fuchsia-500 transition-colors"></div>
                     <div class="flex justify-between items-start mb-2">
-                        <h3 class="font-mono text-xl text-cyan-300">/v1/vector</h3>
-                        <span class="text-[10px] px-2 py-0.5 border border-green-500 text-green-400 rounded-sm">ONLINE</span>
+                        <h3 class="font-mono text-lg md:text-xl text-cyan-300">/v1/vector</h3>
+                        <span class="text-[10px] px-2 py-0.5 border border-green-500 text-green-400 rounded-sm shrink-0 ml-2">ONLINE</span>
                     </div>
-                    <p class="text-xs text-gray-400 mb-4 h-8">Busca semântica, embeddings e RAG engine.</p>
+                    <p class="api-card-desc text-xs text-gray-400 mb-4">Busca semântica, embeddings e RAG engine.</p>
                     <div class="flex justify-between font-mono text-[10px] text-gray-500 border-t border-gray-800 pt-2">
                         <span>LATENCY: 48ms</span><span>REQ: 12k/s</span>
                     </div>
                 </div>
 
-                <div class="glass-panel api-card p-5 group relative overflow-hidden cursor-crosshair">
+                <div class="glass-panel api-card p-4 md:p-5 group relative overflow-hidden cursor-crosshair">
                     <div class="absolute top-0 left-0 w-full h-0.5 bg-fuchsia-500 group-hover:bg-red-500 transition-colors"></div>
                     <div class="flex justify-between items-start mb-2">
-                        <h3 class="font-mono text-xl text-fuchsia-400">/v2/inference</h3>
-                        <span class="text-[10px] px-2 py-0.5 border border-yellow-500 text-yellow-400 rounded-sm">HEAVY LOAD</span>
+                        <h3 class="font-mono text-lg md:text-xl text-fuchsia-400">/v2/inference</h3>
+                        <span class="text-[10px] px-2 py-0.5 border border-yellow-500 text-yellow-400 rounded-sm shrink-0 ml-2">HEAVY</span>
                     </div>
-                    <p class="text-xs text-gray-400 mb-4 h-8">LLM streaming, geração procedural de dados.</p>
+                    <p class="api-card-desc text-xs text-gray-400 mb-4">LLM streaming, geração procedural de dados.</p>
                     <div class="flex justify-between font-mono text-[10px] text-gray-500 border-t border-gray-800 pt-2">
                         <span>LATENCY: 850ms</span><span>REQ: 9k/s</span>
                     </div>
                 </div>
 
-                <div class="glass-panel api-card p-5 group relative overflow-hidden cursor-crosshair opacity-60 grayscale hover:grayscale-0 transition-all">
+                <div class="glass-panel api-card p-4 md:p-5 group relative overflow-hidden cursor-crosshair opacity-60 grayscale hover:grayscale-0 transition-all">
                     <div class="absolute top-0 left-0 w-full h-0.5 bg-gray-600"></div>
                     <div class="flex justify-between items-start mb-2">
-                        <h3 class="font-mono text-xl text-gray-300">/v1/payments</h3>
-                        <span class="text-[10px] px-2 py-0.5 border border-gray-500 text-gray-400 rounded-sm">MAINTENANCE</span>
+                        <h3 class="font-mono text-lg md:text-xl text-gray-300">/v1/payments</h3>
+                        <span class="text-[10px] px-2 py-0.5 border border-gray-500 text-gray-400 rounded-sm shrink-0 ml-2">MAINT</span>
                     </div>
-                    <p class="text-xs text-gray-400 mb-4 h-8">Webhooks financeiros e liquidação de cobranças.</p>
+                    <p class="api-card-desc text-xs text-gray-400 mb-4">Webhooks financeiros e liquidação de cobranças.</p>
                     <div class="flex justify-between font-mono text-[10px] text-gray-500 border-t border-gray-800 pt-2">
                         <span>LATENCY: N/A</span><span>REQ: 0/s</span>
                     </div>
                 </div>
 
-                <div class="glass-panel api-card p-5 group relative overflow-hidden cursor-crosshair">
+                <div class="glass-panel api-card p-4 md:p-5 group relative overflow-hidden cursor-crosshair">
                     <div class="absolute top-0 left-0 w-full h-0.5 bg-cyan-500 group-hover:bg-fuchsia-500 transition-colors"></div>
                     <div class="flex justify-between items-start mb-2">
-                        <h3 class="font-mono text-xl text-cyan-300">/v1/vision</h3>
-                        <span class="text-[10px] px-2 py-0.5 border border-green-500 text-green-400 rounded-sm">ONLINE</span>
+                        <h3 class="font-mono text-lg md:text-xl text-cyan-300">/v1/vision</h3>
+                        <span class="text-[10px] px-2 py-0.5 border border-green-500 text-green-400 rounded-sm shrink-0 ml-2">ONLINE</span>
                     </div>
-                    <p class="text-xs text-gray-400 mb-4 h-8">OCR, detecção facial e análise de imagem.</p>
+                    <p class="api-card-desc text-xs text-gray-400 mb-4">OCR, detecção facial e análise de imagem.</p>
                     <div class="flex justify-between font-mono text-[10px] text-gray-500 border-t border-gray-800 pt-2">
                         <span>LATENCY: 120ms</span><span>REQ: 3k/s</span>
                     </div>
                 </div>
 
-                <div class="glass-panel api-card p-5 group relative overflow-hidden cursor-crosshair border border-red-500/30">
+                <div class="glass-panel api-card p-4 md:p-5 group relative overflow-hidden cursor-crosshair border border-red-500/30">
                     <div class="absolute top-0 left-0 w-full h-0.5 bg-red-600 animate-pulse"></div>
                     <div class="flex justify-between items-start mb-2">
-                        <h3 class="font-mono text-xl text-red-400 glitch-text">/v0/chaos</h3>
-                        <span class="text-[10px] px-2 py-0.5 border border-red-500 text-red-500 rounded-sm">UNSTABLE</span>
+                        <h3 class="font-mono text-lg md:text-xl text-red-400 glitch-text">/v0/chaos</h3>
+                        <span class="text-[10px] px-2 py-0.5 border border-red-500 text-red-500 rounded-sm shrink-0 ml-2">UNSTABLE</span>
                     </div>
-                    <p class="text-xs text-gray-400 mb-4 h-8">Manipulação direta do tecido do sistema.</p>
+                    <p class="api-card-desc text-xs text-gray-400 mb-4">Manipulação direta do tecido do sistema.</p>
                     <div class="flex justify-between font-mono text-[10px] text-gray-500 border-t border-gray-800 pt-2">
                         <span>LATENCY: ERR</span><span>REQ: MAX</span>
                     </div>
@@ -339,34 +390,36 @@
             </div>
 
             <!-- ACTION BUTTON -->
-            <div class="mt-12 flex flex-col items-center gap-4">
+            <div class="mt-8 md:mt-12 flex flex-col items-center gap-4">
                 <button id="danger-btn" class="btn-overload flex flex-col items-center">
-                    <span class="font-bold text-base">GENERATING MASTER KEY</span>
+                    <span class="font-bold text-sm md:text-base">GENERATING MASTER KEY</span>
                     <span class="text-[10px] font-normal text-fuchsia-300 mt-1 opacity-60">
                         SEGURE PARA DESPERTAR O MONSTER
                     </span>
                 </button>
                 <div id="token-output"
                     class="text-xs font-mono text-cyan-300 opacity-0 transition-opacity duration-700
-                           max-w-lg break-all text-center leading-relaxed">
+                           w-full max-w-lg break-all text-center leading-relaxed px-2">
                 </div>
             </div>
 
         </main>
 
         <!-- FOOTER -->
-        <footer class="flex justify-between items-end text-xs text-gray-500 font-mono w-full max-w-7xl mx-auto pointer-events-auto">
-            <div>
-                NODES: 4/12 ACTIVE<br>
-                CORE TEMP:&nbsp;<span
-                    id="temp-display"
-                    class="font-bold cursor-pointer hover:text-red-500 transition-colors"
-                    onclick="enableExtremeMode()"
-                    title="Unleash the Monster">STABLE</span>
-            </div>
-            <div class="text-right">
-                0API.MONSTER<br>
-                V 2.0.4.BETA
+        <footer class="text-xs text-gray-500 font-mono w-full max-w-7xl mx-auto pointer-events-auto">
+            <div class="footer-inner flex flex-row md:flex-row justify-between items-end gap-2 flex-wrap">
+                <div>
+                    NODES: 4/12 ACTIVE<br>
+                    CORE TEMP:&nbsp;<span
+                        id="temp-display"
+                        class="font-bold cursor-pointer hover:text-red-500 transition-colors"
+                        onclick="enableExtremeMode()"
+                        title="Unleash the Monster">STABLE</span>
+                </div>
+                <div class="footer-right text-right">
+                    0API.MONSTER<br>
+                    V 2.0.4.BETA
+                </div>
             </div>
         </footer>
 
@@ -392,7 +445,6 @@
         t.style.color = '#ff0000';
     }
 
-    // Zalgo
     const Z = ['\u0300','\u0301','\u030d','\u030e','\u0315','\u0316',
                '\u0317','\u031b','\u0353','\u0356','\u0304','\u033f','\u0342'];
 
@@ -405,7 +457,6 @@
         }).join('');
     }
 
-    // Status loop
     const statusEl = document.getElementById('system-status-text');
     const msgs = ['SECURE','ENCRYPTING...','ROUTING','VALIDATING',
                   'ERR_TIMEOUT','ACCESS_DENIED','MONSTER_AWAKE'];
@@ -414,7 +465,7 @@
         if (state.crashed) return;
         const hot = state.heat > 30;
         if (hot) {
-            statusEl.textContent = zalgify('MONSTER_UNLEASHED');
+            statusEl.textContent = zalgify('MELTDOWN');
             statusEl.classList.add('status-glitching');
             statusEl.style.color = '#ff0000';
             setTimeout(updateStatus, 80);
@@ -427,7 +478,6 @@
     }
     setTimeout(updateStatus, 1200);
 
-    // Audio
     let ctx;
     const getCtx = () => ctx || (ctx = new (window.AudioContext || window.webkitAudioContext)());
 
@@ -475,7 +525,6 @@
         src.start();
     }
 
-    // Three.js
     const scene = new THREE.Scene();
     scene.fog   = new THREE.FogExp2(0x000000, 0.045);
 
@@ -546,7 +595,6 @@
         renderer.render(scene, camera);
     })();
 
-    // Interactions
     const uiMain   = document.getElementById('main-interface');
     const bar      = document.getElementById('instability-bar');
     const btn      = document.getElementById('danger-btn');
@@ -640,6 +688,7 @@
                     const reload = () => location.reload();
                     document.addEventListener('keydown', reload, { once: true });
                     document.addEventListener('click',   reload, { once: true });
+                    document.addEventListener('touchend', reload, { once: true });
                 }
                 el.textContent = prog;
             }, 55);
