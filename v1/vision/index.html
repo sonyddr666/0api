@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>0API // /v1/vision</title>
+<link rel="shortcut icon" href="../../icon.png" type="image/png">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;overflow-x:hidden;background:#050505;color:#fff;font-family:'Rajdhani',sans-serif;user-select:none}
+#canvas-container{position:fixed;inset:0;z-index:0}
+#main-interface{position:relative;z-index:10;pointer-events:none;min-height:100dvh;display:flex;flex-direction:column;justify-content:space-between;padding:clamp(1rem,3vw,2rem);padding-bottom:calc(clamp(1rem,3vw,2rem) + env(safe-area-inset-bottom,0px));background:radial-gradient(circle at center,transparent 0%,rgba(0,0,0,.65) 100%)}
+.glitch-text{font-family:'Share Tech Mono',monospace;animation:glitch-main 3s infinite linear alternate-reverse}
+@keyframes glitch-main{0%{text-shadow:-2px 0 #38bdf8,2px 0 #818cf8}2%{text-shadow:2px 0 #38bdf8,-2px 0 #818cf8}4%{text-shadow:-2px 0 #38bdf8,2px 0 #818cf8}5%{text-shadow:none}100%{text-shadow:none}}
+.glass-panel{background:rgba(5,10,25,.4);backdrop-filter:blur(10px);border:1px solid rgba(56,189,248,.12);box-shadow:0 4px 30px rgba(0,0,0,.5);transition:all .3s ease;border-radius:2px}
+.info-card:hover{border-color:rgba(56,189,248,.5);box-shadow:0 0 18px rgba(56,189,248,.25);transform:translateY(-2px)}
+.info-card:active{border-color:rgba(56,189,248,.5);box-shadow:0 0 18px rgba(56,189,248,.25)}
+.scanlines{position:fixed;inset:0;background:repeating-linear-gradient(to bottom,transparent 0px,transparent 2px,rgba(0,0,0,.18) 2px,rgba(0,0,0,.18) 4px);pointer-events:none;z-index:20;opacity:.5}
+.corner{position:fixed;width:28px;height:28px;z-index:15;pointer-events:none}
+.corner-tl{top:12px;left:12px;border-top:1px solid #38bdf8;border-left:1px solid #38bdf8}
+.corner-tr{top:12px;right:12px;border-top:1px solid #38bdf8;border-right:1px solid #38bdf8}
+.corner-bl{bottom:18px;left:12px;border-bottom:1px solid #38bdf8;border-left:1px solid #38bdf8}
+.corner-br{bottom:18px;right:12px;border-bottom:1px solid #38bdf8;border-right:1px solid #38bdf8}
+@media(max-width:480px){.corner{display:none}}
+.instability-container{position:fixed;bottom:0;left:0;width:100%;height:6px;background:#111;z-index:50}
+#instability-bar{width:0%;height:100%;background:linear-gradient(90deg,#38bdf8,#818cf8,#fff);box-shadow:0 0 12px #38bdf8;transition:width .08s linear}
+.btn-vision{background:transparent;border:2px solid #38bdf8;color:#38bdf8;text-transform:uppercase;font-family:'Share Tech Mono',monospace;letter-spacing:2px;cursor:pointer;padding:clamp(10px,2vw,14px) clamp(20px,5vw,36px);min-height:44px;transition:all .2s ease;white-space:nowrap;pointer-events:auto}
+.btn-vision:hover{box-shadow:0 0 24px rgba(56,189,248,.5)}
+.btn-vision:active{background:rgba(56,189,248,.15)}
+/* drop zone */
+#drop-zone{border:2px dashed rgba(56,189,248,.25);background:rgba(5,10,25,.3);border-radius:4px;min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;cursor:pointer;pointer-events:auto;transition:all .2s;font-family:'Share Tech Mono',monospace;font-size:.75rem;color:rgba(56,189,248,.5);position:relative;overflow:hidden}
+#drop-zone.drag-over{border-color:#38bdf8;background:rgba(56,189,248,.05);box-shadow:0 0 20px rgba(56,189,248,.15)}
+#drop-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;pointer-events:auto}
+#preview-img{max-width:100%;max-height:140px;object-fit:contain;border-radius:2px;display:none;border:1px solid rgba(56,189,248,.2)}
+/* scan line overlay on image */
+#scan-overlay{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .3s}
+#scan-line{position:absolute;left:0;width:100%;height:2px;background:linear-gradient(90deg,transparent,#38bdf8,transparent);box-shadow:0 0 8px #38bdf8;top:0}
+@keyframes scan-move{0%{top:0%}100%{top:100%}}
+.scanning #scan-overlay{opacity:1}
+.scanning #scan-line{animation:scan-move .8s linear infinite}
+/* result output */
+#result-box{font-family:'Share Tech Mono',monospace;font-size:.72rem;color:#7dd3fc;opacity:0;transition:opacity .5s;background:rgba(5,10,25,.6);border:1px solid rgba(56,189,248,.18);padding:.75rem;border-radius:2px;width:100%;max-width:640px;pointer-events:auto;line-height:1.7;white-space:pre-wrap}
+/* confidence bars */
+.conf-bar{height:4px;background:rgba(56,189,248,.1);border-radius:2px;overflow:hidden;margin-top:3px}
+.conf-fill{height:100%;background:linear-gradient(90deg,#38bdf8,#818cf8);border-radius:2px;transition:width .7s ease}
+.field-label{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:#38bdf8;letter-spacing:.15em;text-transform:uppercase}
+/* bounding box flash */
+@keyframes bbox-appear{0%{opacity:0;transform:scale(.95)}100%{opacity:1;transform:scale(1)}}
+.bbox{position:absolute;border:1px solid #38bdf8;box-shadow:0 0 6px rgba(56,189,248,.5);animation:bbox-appear .3s ease forwards;pointer-events:none}
+.bbox-label{position:absolute;top:-18px;left:0;font-family:'Share Tech Mono',monospace;font-size:.55rem;color:#38bdf8;background:rgba(5,10,25,.8);padding:1px 4px;white-space:nowrap}
+</style>
+</head>
+<body>
+<div id="canvas-container"></div>
+<div class="scanlines"></div>
+<div class="corner corner-tl"></div><div class="corner corner-tr"></div>
+<div class="corner corner-bl"></div><div class="corner corner-br"></div>
+<div class="instability-container"><div id="instability-bar"></div></div>
+
+<div id="main-interface">
+  <!-- HEADER -->
+  <header class="flex justify-between items-center w-full max-w-7xl mx-auto pointer-events-auto gap-2">
+    <a href="../../" class="text-xl font-bold tracking-widest text-sky-400 font-mono hover:text-sky-300 transition-colors">← 0API <span class="text-indigo-400">//</span> MONSTER</a>
+    <div class="inline-flex items-center px-3 py-1 border border-sky-500/50 bg-sky-900/20 text-xs font-mono tracking-widest rounded-sm shrink-0">
+      <span class="inline-block w-2 h-2 rounded-full bg-sky-400 mr-2 animate-pulse"></span>
+      <span class="text-sky-300 font-bold">VISION ONLINE</span>
+    </div>
+  </header>
+
+  <!-- CONTENT -->
+  <main class="flex-1 flex flex-col justify-center w-full max-w-4xl mx-auto px-2 md:px-4 pointer-events-auto z-20 py-6 gap-6">
+    <div class="text-center">
+      <h1 class="glitch-text text-white font-bold tracking-widest" style="font-size:clamp(1.8rem,8vw,3.5rem)">
+        /v1/<span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-indigo-400">vision</span>
+      </h1>
+      <p class="text-gray-400 font-mono mt-2 text-xs">OCR &bull; Detecção Facial &bull; Análise de Imagem &bull; Object Detection</p>
+    </div>
+
+    <!-- INFO CARDS -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="glass-panel info-card p-4 relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-0.5 bg-sky-500"></div>
+        <h3 class="font-mono text-sky-300 text-sm mb-1">POST /analyze</h3>
+        <p class="text-xs text-gray-400">Classificação de imagem com confidence scores multi-label.</p>
+        <div class="mt-3 font-mono text-[10px] text-gray-500 border-t border-gray-800 pt-2 flex justify-between">
+          <span>120ms</span><span class="text-sky-400">ACTIVE</span>
+        </div>
+      </div>
+      <div class="glass-panel info-card p-4 relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-0.5 bg-indigo-500"></div>
+        <h3 class="font-mono text-indigo-300 text-sm mb-1">POST /ocr</h3>
+        <p class="text-xs text-gray-400">Extração de texto com bounding boxes e layout preserve.</p>
+        <div class="mt-3 font-mono text-[10px] text-gray-500 border-t border-gray-800 pt-2 flex justify-between">
+          <span>95ms</span><span class="text-sky-400">ACTIVE</span>
+        </div>
+      </div>
+      <div class="glass-panel info-card p-4 relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-0.5 bg-sky-500"></div>
+        <h3 class="font-mono text-sky-300 text-sm mb-1">POST /detect</h3>
+        <p class="text-xs text-gray-400">Object detection com YOLO-Monster e facial landmarks.</p>
+        <div class="mt-3 font-mono text-[10px] text-gray-500 border-t border-gray-800 pt-2 flex justify-between">
+          <span>210ms</span><span class="text-sky-400">ACTIVE</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEMO -->
+    <div class="glass-panel p-5 flex flex-col gap-4 max-w-lg w-full mx-auto">
+      <p class="text-xs font-mono text-sky-500 tracking-widest">// DEMO — ANALYZE IMAGE</p>
+
+      <!-- Drop zone -->
+      <div id="drop-zone">
+        <input type="file" id="file-input" accept="image/*" />
+        <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="color:rgba(56,189,248,.4)">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 16l4-4 4 4 4-6 4 6" />
+          <rect x="3" y="3" width="18" height="18" rx="2" stroke-width="1.5" />
+        </svg>
+        <span id="drop-label">DROP IMAGE / CLICK TO SELECT</span>
+        <img id="preview-img" alt="preview" />
+        <div id="scan-overlay"><div id="scan-line"></div></div>
+      </div>
+
+      <button class="btn-vision" id="analyze-btn">👁 SCAN &amp; ANALYZE</button>
+      <div id="result-box"></div>
+
+      <!-- confidence bars -->
+      <div id="conf-section" class="hidden flex flex-col gap-2">
+        <span class="field-label">detection confidence</span>
+        <div id="conf-list" class="flex flex-col gap-2"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="text-xs text-gray-500 font-mono w-full max-w-7xl mx-auto pointer-events-auto">
+    <div class="flex justify-between">
+      <span>ENDPOINT: /v1/vision &bull; MODEL: YOLO-Monster-v3 &bull; REQ/S: 3k</span>
+      <span>0API.MONSTER V2.0.4</span>
+    </div>
+  </footer>
+</div>
+
+<!-- THREE.JS BACKGROUND -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const scene=new THREE.Scene();
+scene.fog=new THREE.FogExp2(0x000508,.042);
+const camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,100);
+camera.position.set(0,1.5,11);
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+renderer.setSize(innerWidth,innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+// particles — sky blue + indigo
+const N=3200,pGeo=new THREE.BufferGeometry();
+const pPos=new Float32Array(N*3),pCol=new Float32Array(N*3);
+for(let i=0;i<N;i++){
+  pPos[i*3]=(Math.random()-.5)*32;
+  pPos[i*3+1]=(Math.random()-.5)*32;
+  pPos[i*3+2]=(Math.random()-.5)*32;
+  if(Math.random()>.45){pCol[i*3]=.22;pCol[i*3+1]=.75;pCol[i*3+2]=.98;}
+  else{pCol[i*3]=.51;pCol[i*3+1]=.44;pCol[i*3+2]=.98;}
+}
+pGeo.setAttribute('position',new THREE.BufferAttribute(pPos,3));
+pGeo.setAttribute('color',new THREE.BufferAttribute(pCol,3));
+const pMat=new THREE.PointsMaterial({size:.06,vertexColors:true,transparent:true,opacity:.7});
+const pts=new THREE.Points(pGeo,pMat);
+scene.add(pts);
+
+// wireframe eye-like shape: two nested spheres
+const s1=new THREE.Mesh(
+  new THREE.SphereGeometry(2.8,16,10),
+  new THREE.MeshBasicMaterial({color:0x38bdf8,wireframe:true,transparent:true,opacity:.07})
+);
+const s2=new THREE.Mesh(
+  new THREE.SphereGeometry(1.4,12,8),
+  new THREE.MeshBasicMaterial({color:0x818cf8,wireframe:true,transparent:true,opacity:.09})
+);
+scene.add(s1);scene.add(s2);
+
+// scan grid
+const grid=new THREE.GridHelper(50,40,0x38bdf8,0x001a2e);
+grid.position.y=-6;
+grid.material.transparent=true;
+grid.material.opacity=.2;
+scene.add(grid);
+
+window.addEventListener('resize',()=>{
+  camera.aspect=innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+});
+
+(function loop(){
+  requestAnimationFrame(loop);
+  pts.rotation.y+=.0006;
+  pts.rotation.x+=.0003;
+  s1.rotation.y+=.0025;
+  s1.rotation.x+=.0015;
+  s2.rotation.y-=.004;
+  s2.rotation.z+=.002;
+  grid.rotation.y+=.002;
+  renderer.render(scene,camera);
+})();
+</script>
+
+<!-- DEMO LOGIC -->
+<script>
+const bar=document.getElementById('instability-bar');
+const dropZone=document.getElementById('drop-zone');
+const fileInput=document.getElementById('file-input');
+const previewImg=document.getElementById('preview-img');
+const dropLabel=document.getElementById('drop-label');
+const resultBox=document.getElementById('result-box');
+const confSection=document.getElementById('conf-section');
+const confList=document.getElementById('conf-list');
+
+// drag-over styling
+dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('drag-over');});
+dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop',e=>{
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  const f=e.dataTransfer.files[0];
+  if(f&&f.type.startsWith('image/'))loadPreview(f);
+});
+
+fileInput.addEventListener('change',()=>{
+  if(fileInput.files[0])loadPreview(fileInput.files[0]);
+});
+
+function loadPreview(file){
+  const url=URL.createObjectURL(file);
+  previewImg.src=url;
+  previewImg.style.display='block';
+  dropLabel.style.display='none';
+}
+
+const tagSets=[
+  [
+    {label:'person',conf:.97},
+    {label:'face',conf:.94},
+    {label:'indoor',conf:.88},
+    {label:'technology',conf:.76},
+    {label:'screen',conf:.62}
+  ],
+  [
+    {label:'document',conf:.99},
+    {label:'text',conf:.97},
+    {label:'printed_text',conf:.91},
+    {label:'table',conf:.73},
+    {label:'diagram',conf:.55}
+  ],
+  [
+    {label:'outdoor',conf:.96},
+    {label:'urban',conf:.89},
+    {label:'vehicle',conf:.84},
+    {label:'street',conf:.78},
+    {label:'motion_blur',conf:.61}
+  ],
+  [
+    {label:'abstract',conf:.95},
+    {label:'pattern',conf:.90},
+    {label:'color_gradient',conf:.83},
+    {label:'synthetic',conf:.77},
+    {label:'generated',conf:.68}
+  ]
+];
+
+document.getElementById('analyze-btn').addEventListener('click',()=>{
+  // start scan animation
+  dropZone.classList.add('scanning');
+  bar.style.width='70%';
+  resultBox.style.opacity='0';
+  confSection.classList.add('hidden');
+
+  setTimeout(()=>{
+    dropZone.classList.remove('scanning');
+    bar.style.width='0%';
+
+    // pick random tag set
+    const tags=tagSets[Math.random()*tagSets.length|0];
+    const w=Math.round(320+Math.random()*1600);
+    const h=Math.round(240+Math.random()*1200);
+    const ch=tags[0].label.toUpperCase();
+
+    resultBox.textContent=
+`model:     YOLO-Monster-v3
+resolution: ${w}x${h}px
+channels:  RGB
+primary:   ${ch}
+objects:   ${tags.length} detected
+processed: ${(90+Math.random()*130|0)}ms
+
+bounding_boxes: ${tags.length}`;
+    resultBox.style.opacity='1';
+
+    // confidence bars
+    confSection.classList.remove('hidden');
+    confList.innerHTML='';
+    tags.forEach(t=>{
+      confList.innerHTML+=`
+        <div>
+          <div class="flex justify-between text-[10px] font-mono text-gray-400">
+            <span>${t.label}</span>
+            <span class="text-sky-300">${(t.conf*100).toFixed(1)}%</span>
+          </div>
+          <div class="conf-bar">
+            <div class="conf-fill" style="width:${t.conf*100}%"></div>
+          </div>
+        </div>`;
+    });
+  },1100);
+});
+</script>
+</body>
+</html>
