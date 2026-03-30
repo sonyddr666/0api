@@ -11,10 +11,10 @@
 *,*::before,*::after{box-sizing:border-box}
 body{margin:0;overflow-x:hidden;background:#050505;color:#fff;font-family:'Rajdhani',sans-serif;user-select:none}
 #canvas-container{position:fixed;inset:0;z-index:0}
-#main-interface{position:relative;z-index:10;pointer-events:none;min-height:100dvh;display:flex;flex-direction:column;justify-content:space-between;padding:clamp(1rem,3vw,2rem);padding-bottom:calc(clamp(1rem,3vw,2rem) + env(safe-area-inset-bottom,0px));background:radial-gradient(circle at center,transparent 0%,rgba(0,0,0,.65) 100%)}
+#main-interface{position:relative;z-index:10;pointer-events:none;min-height:100dvh;display:flex;flex-direction:column;justify-content:space-between;padding:clamp(1rem,3vw,2rem);padding-bottom:calc(clamp(1rem,3vw,2rem) + env(safe-area-inset-bottom,0px));background:radial-gradient(circle at center,transparent 0%,rgba(0,0,0,.68) 100%)}
 .glitch-text{font-family:'Share Tech Mono',monospace;animation:glitch-chaos .5s infinite linear alternate-reverse}
 @keyframes glitch-chaos{0%{text-shadow:-4px 0 #ff0000,4px 0 #ff00ff,0 2px #ff6600}20%{text-shadow:4px 0 #ff0000,-4px 0 #ff00ff,0 -2px #ff6600}40%{text-shadow:-2px 2px #ff0000,2px -2px #ff00ff;transform:skewX(-3deg)}60%{text-shadow:2px 2px #ff0000,-2px -2px #ff00ff;transform:skewX(3deg)}80%{text-shadow:none;transform:skewX(0)}100%{text-shadow:-4px 0 #ff0000,4px 0 #ff00ff}}
-.glass-panel{background:rgba(20,5,5,.4);backdrop-filter:blur(10px);border:1px solid rgba(255,0,0,.2);box-shadow:0 4px 30px rgba(0,0,0,.5);transition:all .3s ease;border-radius:2px}
+.glass-panel{background:rgba(20,5,5,.45);backdrop-filter:blur(12px);border:1px solid rgba(255,0,0,.18);box-shadow:0 4px 30px rgba(0,0,0,.5);transition:all .3s ease;border-radius:2px}
 .info-card:hover{border-color:rgba(255,0,0,.6);box-shadow:0 0 20px rgba(255,0,0,.3);transform:translateY(-2px)}
 .scanlines{position:fixed;inset:0;background:repeating-linear-gradient(to bottom,transparent 0px,transparent 2px,rgba(0,0,0,.18) 2px,rgba(0,0,0,.18) 4px);pointer-events:none;z-index:20;opacity:.5}
 .corner{position:fixed;width:28px;height:28px;z-index:15;pointer-events:none}
@@ -24,40 +24,55 @@ body{margin:0;overflow-x:hidden;background:#050505;color:#fff;font-family:'Rajdh
 .corner-br{bottom:18px;right:12px;border-bottom:1px solid #ff0000;border-right:1px solid #ff0000}
 @media(max-width:480px){.corner{display:none}}
 .instability-container{position:fixed;bottom:0;left:0;width:100%;height:6px;background:#111;z-index:50}
-#instability-bar{width:0%;height:100%;background:linear-gradient(90deg,#ff0000,#ff00ff,#ffffff);box-shadow:0 0 12px #ff0000;transition:width .15s linear}
+#instability-bar{width:0%;height:100%;background:linear-gradient(90deg,#ff0000,#ff00ff,#fff);box-shadow:0 0 12px #ff0000;transition:width .12s linear}
+/* BTN */
 .btn-chaos{background:transparent;border:2px solid #ff0000;color:#ff0000;text-transform:uppercase;font-family:'Share Tech Mono',monospace;letter-spacing:2px;cursor:pointer;padding:clamp(10px,2vw,14px) clamp(20px,5vw,36px);min-height:44px;transition:all .2s ease;white-space:nowrap;pointer-events:auto;animation:btn-glow 2s infinite}
-@keyframes btn-glow{0%,100%{box-shadow:0 0 8px rgba(255,0,0,.3)}50%{box-shadow:0 0 20px rgba(255,0,0,.6)}}
-.btn-chaos:hover{box-shadow:0 0 30px rgba(255,0,0,.8);background:rgba(255,0,0,.1)}
-.btn-chaos:active{background:rgba(255,0,0,.3);border-color:#fff;color:#fff}
-.btn-chaos.locked{pointer-events:none;opacity:.4;animation:none;border-color:#555;color:#555;cursor:not-allowed}
+@keyframes btn-glow{0%,100%{box-shadow:0 0 8px rgba(255,0,0,.3)}50%{box-shadow:0 0 22px rgba(255,0,0,.7)}}
+.btn-chaos:hover{box-shadow:0 0 30px rgba(255,0,0,.9);background:rgba(255,0,0,.08)}
+.btn-chaos:active{background:rgba(255,0,0,.25);border-color:#fff;color:#fff}
+.btn-chaos.locked{pointer-events:none;opacity:.35;animation:none;border-color:#444;color:#444;cursor:not-allowed}
+/* BADGES */
 .warn-badge{display:inline-block;padding:2px 8px;border:1px solid #ff0000;color:#ff0000;font-family:'Share Tech Mono',monospace;font-size:.6rem;letter-spacing:.1em;border-radius:2px;animation:warn-blink 1s step-end infinite}
 @keyframes warn-blink{0%,100%{opacity:1}50%{opacity:0}}
-.bug-label{background:rgba(255,0,0,.1);border:1px solid rgba(255,0,0,.4);color:#ff4444;font-family:'Share Tech Mono',monospace;font-size:.55rem;padding:2px 6px;border-radius:3px;display:inline-block;margin-left:4px;cursor:default}
-/* terminal / entropy output */
-#entropy-display{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:#ff4444;opacity:0;transition:opacity .4s;background:rgba(20,5,5,.7);border:1px solid rgba(255,0,0,.3);padding:.75rem;border-radius:2px;width:100%;max-width:640px;white-space:pre-wrap;overflow-x:auto;pointer-events:auto;line-height:1.6;min-height:56px}
-/* progress bar fill for click count */
-#click-progress{height:4px;background:rgba(255,0,0,.1);border-radius:2px;overflow:hidden;margin-top:4px}
-#click-fill{height:100%;width:0%;background:linear-gradient(90deg,#ff4444,#ff00ff);transition:width .1s linear;border-radius:2px}
-/* phase labels */
+.bug-label{background:rgba(255,0,0,.1);border:1px solid rgba(255,0,0,.4);color:#ff4444;font-family:'Share Tech Mono',monospace;font-size:.55rem;padding:2px 6px;border-radius:3px;display:inline-block;cursor:default}
 .phase-tag{font-family:'Share Tech Mono',monospace;font-size:.6rem;padding:1px 6px;border-radius:2px;display:inline-block;margin-left:6px}
 .phase-warn{background:rgba(255,200,0,.12);border:1px solid rgba(255,200,0,.4);color:#ffd700}
 .phase-crit{background:rgba(255,0,0,.12);border:1px solid rgba(255,0,0,.5);color:#ff4444}
-/* floating toast — redirect storm */
-.toast{position:fixed;z-index:9999;background:rgba(0,0,0,.92);border:1px solid #ff0000;border-radius:4px;font-family:'Share Tech Mono',monospace;font-size:.6rem;padding:10px 14px;max-width:270px;line-height:1.7;pointer-events:none;transform:translateX(0);transition:opacity .3s}
-#toast-redirect{top:20px;right:20px;color:#ff6666;opacity:0}
-#toast-desync{bottom:28px;left:20px;color:#ff00ff;opacity:0}
-#toast-herd{top:20px;left:50%;transform:translateX(-50%);color:#ff9944;opacity:0;text-align:center}
-/* MELTDOWN overlay */
-#meltdown-overlay{position:fixed;inset:0;z-index:8888;background:rgba(0,0,0,0);pointer-events:none;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;font-size:clamp(1rem,4vw,2rem);color:#ff0000;text-align:center;transition:background .5s;display:none}
-#meltdown-msg{opacity:0;transition:opacity .5s;text-shadow:-3px 0 #ff00ff,3px 0 #ff0000;line-height:1.6;padding:1rem}
-/* alarm flash on body */
-@keyframes alarm-pulse{0%,100%{box-shadow:inset 0 0 0 0 transparent}50%{box-shadow:inset 0 0 200px 40px rgba(255,0,0,.25)}}
+/* TERMINAL */
+#entropy-display{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:#ff4444;opacity:0;transition:opacity .3s;background:rgba(10,2,2,.8);border:1px solid rgba(255,0,0,.25);padding:.8rem;border-radius:2px;width:100%;white-space:pre-wrap;overflow-x:auto;pointer-events:auto;line-height:1.65;min-height:60px}
+/* BUG GRID (15 cards) */
+#bug-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;pointer-events:auto}
+.bug-card{background:rgba(20,5,5,.5);border:1px solid rgba(255,0,0,.15);border-radius:3px;padding:8px 10px;font-family:'Share Tech Mono',monospace;font-size:.58rem;color:#ff4444;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.bug-card:hover{border-color:rgba(255,0,0,.5);background:rgba(255,0,0,.06);transform:translateY(-1px)}
+.bug-card.active{border-color:#ff0000;box-shadow:0 0 12px rgba(255,0,0,.4)}
+.bug-card.triggered{border-color:#ff00ff;color:#ff00ff;box-shadow:0 0 10px rgba(255,0,0,.3)}
+.bug-num{color:#ff6600;font-size:.5rem;display:block;margin-bottom:2px}
+.bug-name{color:#fff;font-size:.62rem;font-weight:500}
+/* CLICK METER */
+#click-progress{height:4px;background:rgba(255,0,0,.1);border-radius:2px;overflow:hidden;margin-top:4px}
+#click-fill{height:100%;width:0%;background:linear-gradient(90deg,#ff4444,#ff00ff);transition:width .1s;border-radius:2px}
+#rate-bar-wrap{display:flex;align-items:center;gap:8px;font-family:'Share Tech Mono',monospace;font-size:.62rem;color:#ff4444}
+/* TOASTS */
+.toast{position:fixed;z-index:9999;background:rgba(0,0,0,.93);border-left:3px solid #ff0000;border-radius:3px;font-family:'Share Tech Mono',monospace;font-size:.58rem;padding:9px 13px;max-width:260px;line-height:1.8;pointer-events:none;transition:opacity .3s}
+#toast-a{top:18px;right:18px;color:#ff6666;opacity:0}
+#toast-b{top:18px;left:18px;color:#ff9900;opacity:0}
+#toast-c{bottom:26px;right:18px;color:#ff00ff;opacity:0}
+#toast-d{bottom:26px;left:18px;color:#44ffaa;opacity:0}
+/* MELTDOWN OVERLAY */
+#meltdown-overlay{position:fixed;inset:0;z-index:8888;pointer-events:none;display:none;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;font-size:clamp(.9rem,3.5vw,1.8rem);color:#ff0000;text-align:center}
+#meltdown-msg{opacity:0;transition:opacity .6s;text-shadow:-3px 0 #ff00ff,3px 0 #ff0000;line-height:1.7;padding:1rem}
+/* ALARM */
+@keyframes alarm-pulse{0%,100%{box-shadow:inset 0 0 0 0 transparent}50%{box-shadow:inset 0 0 200px 40px rgba(255,0,0,.22)}}
 .alarming{animation:alarm-pulse .4s infinite}
-/* skew glitch for meltdown */
+/* GLITCH SKEW */
 @keyframes skew-crash{0%{transform:skewX(0)}10%{transform:skewX(-8deg)}20%{transform:skewX(6deg)}30%{transform:skewX(-4deg)}40%{transform:skewX(0)}100%{transform:skewX(0)}}
 .skew-once{animation:skew-crash .5s ease forwards}
-/* rate limit visual */
-#rate-bar-wrap{display:flex;align-items:center;gap:8px;font-family:'Share Tech Mono',monospace;font-size:.62rem;color:#ff4444}
+/* DEBOUNCE INPUT */
+#debounce-wrap{display:none;flex-direction:column;gap:4px;pointer-events:auto}
+#debounce-input{background:rgba(20,5,5,.8);border:1px solid rgba(255,0,0,.3);color:#ff4444;font-family:'Share Tech Mono',monospace;font-size:.7rem;padding:6px 10px;outline:none;border-radius:2px;width:100%}
+#debounce-log{font-family:'Share Tech Mono',monospace;font-size:.58rem;color:#ff6600;max-height:60px;overflow-y:auto;background:rgba(0,0,0,.4);padding:4px 8px;border-radius:2px;border:1px solid rgba(255,0,0,.1)}
+/* RENDER COUNTER */
+#render-counter{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:#ff00ff;display:none;padding:4px 0}
 </style>
 </head>
 <body>
@@ -68,10 +83,10 @@ body{margin:0;overflow-x:hidden;background:#050505;color:#fff;font-family:'Rajdh
 <div class="instability-container"><div id="instability-bar"></div></div>
 <div id="meltdown-overlay"><div id="meltdown-msg"></div></div>
 
-<!-- TOASTS -->
-<div class="toast" id="toast-redirect"></div>
-<div class="toast" id="toast-desync"></div>
-<div class="toast" id="toast-herd"></div>
+<div class="toast" id="toast-a"></div>
+<div class="toast" id="toast-b"></div>
+<div class="toast" id="toast-c"></div>
+<div class="toast" id="toast-d"></div>
 
 <div id="main-interface">
   <header class="flex justify-between items-center w-full max-w-7xl mx-auto pointer-events-auto gap-2">
@@ -81,70 +96,66 @@ body{margin:0;overflow-x:hidden;background:#050505;color:#fff;font-family:'Rajdh
     </div>
   </header>
 
-  <main class="flex-1 flex flex-col justify-center w-full max-w-4xl mx-auto px-2 md:px-4 pointer-events-auto z-20 py-6 gap-6" id="main-content">
+  <main class="flex-1 flex flex-col justify-center w-full max-w-4xl mx-auto px-2 md:px-4 pointer-events-auto z-20 py-6 gap-5" id="main-content">
     <div class="text-center">
       <h1 id="chaos-title" class="glitch-text text-white font-bold tracking-widest" style="font-size:clamp(1.8rem,8vw,3.5rem)">
         /v0/<span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-fuchsia-600">chaos</span>
       </h1>
       <p class="text-gray-400 font-mono mt-2 text-xs">
-        Manipulação Direta do Tecido do Sistema
+        15 bugs reais — todos ativos
         <span class="bug-label" id="current-bug-label">Click Spam Bug</span>
         <span class="phase-tag phase-warn" id="phase-tag">PHASE 0</span>
       </p>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="glass-panel info-card p-4 relative overflow-hidden">
-        <div class="absolute top-0 left-0 w-full h-0.5 bg-red-500 animate-pulse"></div>
-        <h3 class="font-mono text-red-300 text-sm mb-1">POST /inject</h3>
-        <p class="text-xs text-gray-400">Injeta entropia diretamente no pipeline de dados em execução.</p>
-        <div class="mt-3 font-mono text-[10px] text-gray-500 border-t border-gray-800 pt-2 flex justify-between">
-          <span>LATENCY: ERR</span><span class="text-red-400 animate-pulse">UNSTABLE</span>
-        </div>
-      </div>
-      <div class="glass-panel info-card p-4 relative overflow-hidden">
-        <div class="absolute top-0 left-0 w-full h-0.5 bg-fuchsia-500 animate-pulse"></div>
-        <h3 class="font-mono text-fuchsia-300 text-sm mb-1">POST /mutate</h3>
-        <p class="text-xs text-gray-400">Altera parâmetros de inferência em tempo de execução sem lock.</p>
-        <div class="mt-3 font-mono text-[10px] text-gray-500 border-t border-gray-800 pt-2 flex justify-between">
-          <span>LATENCY: ∞</span><span class="text-fuchsia-400 animate-pulse">UNSTABLE</span>
-        </div>
-      </div>
-      <div class="glass-panel info-card p-4 relative overflow-hidden border-red-500/40">
-        <div class="absolute top-0 left-0 w-full h-0.5 bg-red-700 animate-ping"></div>
-        <h3 class="font-mono text-red-400 text-sm mb-1">/override</h3>
-        <p class="text-xs text-gray-400">Acesso root ao núcleo do sistema. Sem rollback. Sem logs.</p>
-        <div class="mt-3 font-mono text-[10px] text-gray-500 border-t border-gray-800 pt-2 flex justify-between">
-          <span>LATENCY: MAX</span><span class="text-red-500 animate-pulse">CRITICAL</span>
-        </div>
-      </div>
+    <!-- 15 BUG CARDS -->
+    <div id="bug-grid">
+      <div class="bug-card" data-bug="1"><span class="bug-num">#01</span><span class="bug-name">Infinite Redirect Loop</span></div>
+      <div class="bug-card" data-bug="2"><span class="bug-num">#02</span><span class="bug-name">Redirect Storm</span></div>
+      <div class="bug-card" data-bug="3"><span class="bug-num">#03</span><span class="bug-name">Click Spam Bug</span></div>
+      <div class="bug-card" data-bug="4"><span class="bug-num">#04</span><span class="bug-name">Double Submit Bug</span></div>
+      <div class="bug-card" data-bug="5"><span class="bug-num">#05</span><span class="bug-name">Race Condition Nav</span></div>
+      <div class="bug-card" data-bug="6"><span class="bug-num">#06</span><span class="bug-name">Event Handler Dup</span></div>
+      <div class="bug-card" data-bug="7"><span class="bug-num">#07</span><span class="bug-name">State Desync</span></div>
+      <div class="bug-card" data-bug="8"><span class="bug-num">#08</span><span class="bug-name">Route Loop</span></div>
+      <div class="bug-card" data-bug="9"><span class="bug-num">#09</span><span class="bug-name">Navigation Loop</span></div>
+      <div class="bug-card" data-bug="10"><span class="bug-num">#10</span><span class="bug-name">Debounce Ausente</span></div>
+      <div class="bug-card" data-bug="11"><span class="bug-num">#11</span><span class="bug-name">Thundering Herd</span></div>
+      <div class="bug-card" data-bug="12"><span class="bug-num">#12</span><span class="bug-name">UI Lock / Frozen</span></div>
+      <div class="bug-card" data-bug="13"><span class="bug-num">#13</span><span class="bug-name">Button Spam Crash</span></div>
+      <div class="bug-card" data-bug="14"><span class="bug-num">#14</span><span class="bug-name">Click Flood</span></div>
+      <div class="bug-card" data-bug="15"><span class="bug-num">#15</span><span class="bug-name">Re-render Loop</span></div>
     </div>
 
+    <!-- debounce input (shown for bug 10) -->
+    <div id="debounce-wrap">
+      <span style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:#ff4444">🔍 SEM DEBOUNCE — cada tecla dispara fetch()</span>
+      <input id="debounce-input" placeholder="Digite aqui (sem debounce)" />
+      <div id="debounce-log">aguardando input…</div>
+    </div>
+
+    <!-- render counter (bug 15) -->
+    <div id="render-counter"></div>
+
+    <!-- MAIN ENGINE PANEL -->
     <div class="glass-panel p-5 flex flex-col gap-4 max-w-lg w-full mx-auto">
       <div class="flex items-center justify-between">
-        <p class="text-xs font-mono text-red-400 tracking-widest">// CHAOS ENGINE — INJECT ENTROPY</p>
+        <p class="text-xs font-mono text-red-400 tracking-widest">// CHAOS ENGINE — RATE LIMIT: 20</p>
         <span class="warn-badge">ROOT</span>
       </div>
-
       <div id="rate-bar-wrap">
-        <span id="click-count-label">0 / 20 injeções</span>
+        <span id="click-count-label">0 / 20</span>
         <div style="flex:1"><div id="click-progress"><div id="click-fill"></div></div></div>
         <span id="rate-status">OK</span>
       </div>
-
-      <p class="text-xs text-gray-500 font-mono leading-relaxed">
-        Resultados são não-determinísticos.<br>
-        Sem garantia de idempotência. Rate limit: <span class="text-red-400 font-bold">20 req</span> — após isso, sistema colapsa.
-      </p>
-
       <button class="btn-chaos" id="chaos-btn">⚡ INJECT CHAOS</button>
       <div id="entropy-display"></div>
     </div>
   </main>
 
   <footer class="text-xs text-gray-500 font-mono w-full max-w-7xl mx-auto pointer-events-auto">
-    <div class="flex justify-between">
-      <span>ENDPOINT: /v0/chaos &bull; RATE LIMIT: 20 &bull; STATUS: <span id="footer-status">UNSTABLE</span></span>
+    <div class="flex justify-between flex-wrap gap-1">
+      <span>ENDPOINT: /v0/chaos &bull; BUGS: 15 ACTIVE &bull; STATUS: <span id="footer-status">UNSTABLE</span></span>
       <span>0API.MONSTER V2.0.4</span>
     </div>
   </footer>
@@ -153,15 +164,12 @@ body{margin:0;overflow-x:hidden;background:#050505;color:#fff;font-family:'Rajdh
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 /* ── THREE.JS BACKGROUND ── */
-const scene=new THREE.Scene();
-scene.fog=new THREE.FogExp2(0x110000,.04);
+const scene=new THREE.Scene();scene.fog=new THREE.FogExp2(0x110000,.04);
 const camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,100);
 camera.position.set(0,1.5,11);
 const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
-renderer.setSize(innerWidth,innerHeight);
-renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,2));
 document.getElementById('canvas-container').appendChild(renderer.domElement);
-
 const N=4000,pGeo=new THREE.BufferGeometry();
 const pPos=new Float32Array(N*3),pCol=new Float32Array(N*3);
 for(let i=0;i<N;i++){
@@ -173,242 +181,381 @@ for(let i=0;i<N;i++){
 }
 pGeo.setAttribute('position',new THREE.BufferAttribute(pPos,3));
 pGeo.setAttribute('color',new THREE.BufferAttribute(pCol,3));
-const pMat=new THREE.PointsMaterial({size:.07,vertexColors:true,transparent:true,opacity:.8});
-const pts=new THREE.Points(pGeo,pMat);scene.add(pts);
-
+const pts=new THREE.Points(pGeo,new THREE.PointsMaterial({size:.07,vertexColors:true,transparent:true,opacity:.8}));scene.add(pts);
 const shapes=[];
 for(let i=0;i<5;i++){
-  const g=new THREE.IcosahedronGeometry(1+i*.6,1);
-  const m=new THREE.MeshBasicMaterial({color:i%2?0xff0000:0xff00ff,wireframe:true,transparent:true,opacity:.06-i*.01});
-  const mesh=new THREE.Mesh(g,m);shapes.push(mesh);scene.add(mesh);
+  const m=new THREE.Mesh(new THREE.IcosahedronGeometry(1+i*.6,1),new THREE.MeshBasicMaterial({color:i%2?0xff0000:0xff00ff,wireframe:true,transparent:true,opacity:.06-i*.01}));
+  shapes.push(m);scene.add(m);
 }
-const grid=new THREE.GridHelper(50,35,0xff0000,0x1a0000);
-grid.position.y=-6;grid.material.transparent=true;grid.material.opacity=.2;scene.add(grid);
-
+const grid=new THREE.GridHelper(50,35,0xff0000,0x1a0000);grid.position.y=-6;grid.material.transparent=true;grid.material.opacity=.2;scene.add(grid);
 window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
-
 let bgChaos=0;
-(function loop(){
-  requestAnimationFrame(loop);
+(function loop(){requestAnimationFrame(loop);
   pts.rotation.y+=.001+bgChaos*.004;pts.rotation.x+=.0005+bgChaos*.002;
   shapes.forEach((s,i)=>{s.rotation.x+=(.003+bgChaos*.012)*(i%2?1:-1);s.rotation.y+=(.002+bgChaos*.009)*((i+1)%2?1:-1);s.rotation.z+=.001*i;});
-  grid.rotation.y+=.003;
-  if(bgChaos>0)bgChaos-=.015;
-  renderer.render(scene,camera);
+  grid.rotation.y+=.003;if(bgChaos>0)bgChaos-=.015;renderer.render(scene,camera);
 })();
 
-/* ── ZALGO CHARS ── */
-const Z=['\u0300','\u0301','\u030d','\u030e','\u0315','\u0316','\u0317','\u031b','\u0342','\u0306','\u030c','\u0310','\u0312'];
-function zalgify(s,intensity=1){
-  return[...s].map(c=>{
-    let r=c;
-    if(Math.random()<.5*intensity)r+=Z[Math.random()*Z.length|0];
-    if(Math.random()<.3*intensity)r+=Z[Math.random()*Z.length|0];
-    if(Math.random()<.15*intensity)r+=Z[Math.random()*Z.length|0];
-    return r;
-  }).join('');
+/* ── ZALGO ── */
+const ZC=['\u0300','\u0301','\u030d','\u030e','\u0315','\u0316','\u0317','\u031b','\u0342','\u0306','\u030c'];
+function zalgify(s,k=1){return[...s].map(c=>{let r=c;if(Math.random()<.5*k)r+=ZC[Math.random()*ZC.length|0];if(Math.random()<.3*k)r+=ZC[Math.random()*ZC.length|0];if(Math.random()<.15*k)r+=ZC[Math.random()*ZC.length|0];return r;}).join('');}
+
+/* ── TOAST ── */
+function toast(id,html,ms=3200){const el=document.getElementById(id);el.innerHTML=html;el.style.opacity='1';clearTimeout(el._t);el._t=setTimeout(()=>el.style.opacity='0',ms);}
+
+/* ── TYPEWRITER ── */
+const display=document.getElementById('entropy-display');
+let twIv;
+function typeWriter(text,speed=16){
+  clearInterval(twIv);display.style.opacity='1';display.textContent='';
+  let i=0;twIv=setInterval(()=>{display.textContent+=text[i]||'';i++;if(i>=text.length)clearInterval(twIv);},speed);
 }
 
-/* ── TOAST HELPER ── */
-function showToast(id, html, duration=3500){
-  const el=document.getElementById(id);
-  el.innerHTML=html;el.style.opacity='1';
-  clearTimeout(el._t);
-  el._t=setTimeout(()=>el.style.opacity='0',duration);
-}
-
-/* ── ENTROPY LOGS PER PHASE ── */
-const phaseLogs=[
-  // Phase 0 → 1..5 clicks: normal inject
-  [
-    '> INJECT entropy_seed=0x'+Math.floor(Math.random()*0xFFFFFF).toString(16).toUpperCase()+'\n> chaos_level=LOW\n> pipeline: accepting\n> status: OK',
-    '> MUTATE temp=1.2 top_p=0.9\n> model_weights: drifting\n> hallucination_rate: 12%\n> context: nominal',
-    '> OVERRIDE auth=user\n> WARNING: elevated privileges\n> core_modules: accessible\n> system_state: RUNNING'
-  ],
-  // Phase 1 → 6..12: coisas ficam estranhas
-  [
-    '> INJECT [duplicate request #2]\n> WARNING: debounce missing\n> queue depth: '+Math.floor(4+Math.random()*8)+'\n> race_condition: ACTIVE\n> responses out-of-order: YES',
-    '> DOUBLE SUBMIT detected\n> form_id: chaos-engine\n> submission count: 2\n> idempotency_key: null\n> server response: 409 CONFLICT',
-    '> EVENT HANDLER count: '+Math.floor(8+Math.random()*15)+'\n> same listener registered multiple times\n> click fires '+Math.floor(3+Math.random()*5)+'x per interaction\n> memory: leaking'
-  ],
-  // Phase 2 → 13..19: entrando em colapso
-  [
-    zalgify('> STATE DESYNC\n> ui_state=IDLE  backend_state=CRASHED\n> button appears clickable\n> action WILL FAIL silently',1.2),
-    zalgify('> RE-RENDER LOOP detected\n> useEffect → setState → render → useEffect\n> render count: '+Math.floor(80+Math.random()*400)+'\n> CPU: 98%\n> UI: FROZEN',1.4),
-    zalgify('> NAVIGATION LOOP\n> /chaos → /inject → /chaos → ...\n> history.length: '+Math.floor(50+Math.random()*200)+'\n> back button: USELESS\n> route stack: OVERFLOW',1.5)
-  ]
-];
+/* ── DOM REFS ── */
+const btn       =document.getElementById('chaos-btn');
+const fill      =document.getElementById('click-fill');
+const iBar      =document.getElementById('instability-bar');
+const countLbl  =document.getElementById('click-count-label');
+const rateStatus=document.getElementById('rate-status');
+const phaseTag  =document.getElementById('phase-tag');
+const bugLabel  =document.getElementById('current-bug-label');
+const footerSt  =document.getElementById('footer-status');
+const statusBdg =document.getElementById('status-badge');
+const meltOverlay=document.getElementById('meltdown-overlay');
+const meltMsg   =document.getElementById('meltdown-msg');
+const renderCtr =document.getElementById('render-counter');
+const debounceWrap=document.getElementById('debounce-wrap');
+const debounceInput=document.getElementById('debounce-input');
+const debounceLog=document.getElementById('debounce-log');
 
 /* ── CLICK STATE ── */
 let clickCount=0;
 const LIMIT=20;
+let dupHandlerCount=0;
+let renderLoopCount=0;
+let renderLoopAnim=null;
+let routeLoopCount=0;
+let redirectStormCount=0;
 
-const btn       = document.getElementById('chaos-btn');
-const display   = document.getElementById('entropy-display');
-const fill      = document.getElementById('click-fill');
-const iBar      = document.getElementById('instability-bar');
-const countLbl  = document.getElementById('click-count-label');
-const rateStatus= document.getElementById('rate-status');
-const phaseTag  = document.getElementById('phase-tag');
-const bugLabel  = document.getElementById('current-bug-label');
-const footerSt  = document.getElementById('footer-status');
-const statusBdg = document.getElementById('status-badge');
-const mainCont  = document.getElementById('main-content');
-const meltOverlay=document.getElementById('meltdown-overlay');
-const meltMsg   = document.getElementById('meltdown-msg');
+function getPhase(n){if(n<=5)return 0;if(n<=12)return 1;if(n<=19)return 2;return 3;}
 
-// ── PHASE THRESHOLDS ──
-function getPhase(n){
-  if(n<=5)  return 0;
-  if(n<=12) return 1;
-  if(n<=19) return 2;
-  return 3; // meltdown
+function updateMeter(n){
+  const pct=Math.min((n/LIMIT)*100,100);
+  fill.style.width=pct+'%';iBar.style.width=pct+'%';countLbl.textContent=n+' / '+LIMIT;
 }
 
-function updateUI(n){
-  // progress bar
-  const pct=Math.min((n/LIMIT)*100,100);
-  fill.style.width=pct+'%';
-  iBar.style.width=pct+'%';
-  countLbl.textContent=n+' / '+LIMIT+' injeções';
+function setPhaseStyle(phase){
+  if(phase===1){btn.style.borderColor='#ffd700';btn.style.color='#ffd700';statusBdg.textContent='⚠ DEGRADED';footerSt.textContent='DEGRADED';rateStatus.style.color='#ffd700';rateStatus.textContent='WARNING';phaseTag.textContent='PHASE 1 — DEGRADED';phaseTag.className='phase-tag phase-crit';}
+  if(phase===2){btn.style.borderColor='#ff00ff';btn.style.color='#ff00ff';statusBdg.textContent='⚠ CRITICAL';footerSt.textContent='CRITICAL';rateStatus.style.color='#ff00ff';rateStatus.textContent='CRITICAL';phaseTag.textContent='PHASE 2 — CRITICAL';phaseTag.className='phase-tag phase-crit';document.body.classList.add('alarming');}
+}
 
-  const phase=getPhase(n);
+/* ─────────────────────────────────
+   15 BUGS REAIS ── cada um tem comportamento próprio
+───────────────────────────────── */
 
-  if(phase===0){
-    rateStatus.textContent='OK';rateStatus.style.color='#ff4444';
-    phaseTag.textContent='PHASE 0';phaseTag.className='phase-tag phase-warn';
-    bugLabel.textContent='Click Spam Bug';
-  } else if(phase===1){
-    rateStatus.textContent='WARNING';rateStatus.style.color='#ffd700';
-    phaseTag.textContent='PHASE 1 — DEGRADED';phaseTag.className='phase-tag phase-crit';
-    bugLabel.textContent='Race Condition + Double Submit';
-    btn.style.borderColor='#ffd700';btn.style.color='#ffd700';
-    statusBdg.textContent='⚠ DEGRADED';
-    footerSt.textContent='DEGRADED';
-  } else if(phase===2){
-    rateStatus.textContent='CRITICAL';rateStatus.style.color='#ff00ff';
-    phaseTag.textContent='PHASE 2 — CRITICAL';phaseTag.className='phase-tag phase-crit';
-    bugLabel.textContent='Re-render Loop + State Desync';
-    btn.style.borderColor='#ff00ff';btn.style.color='#ff00ff';
-    statusBdg.textContent='⚠ CRITICAL';
-    footerSt.textContent='CRITICAL';
-    document.body.classList.add('alarming');
+// BUG #1 — Infinite Redirect Loop
+// URL param e= incrementa a cada clique; para em 8 pra não sair da página
+function bug1_redirectLoop(){
+  const e=+(new URLSearchParams(location.search).get('e')||0);
+  if(e<8){
+    const u=new URL(location.href);u.searchParams.set('e',e+1);
+    history.pushState({},'',u);
+    toast('toast-a',`🔄 REDIRECT LOOP #${e+1}<br>/login → /dashboard → /login → ...<br>history.length: ${history.length}`,2800);
+    typeWriter(`> REDIRECT LOOP iteration ${e+1}\n> /login → /dashboard → /login → ...\n> history.length: ${history.length}\n> middleware: no session check\n> loop: ACTIVE`);
+  } else {
+    history.pushState({},'',location.pathname);
+    toast('toast-a','🔄 LOOP INTERROMPIDO<br>Máx iterações alcançadas<br>history.length: '+history.length,2500);
+    typeWriter(`> LOOP INTERRUPTED at max iterations\n> history.length: ${history.length}\n> [fix] add pathname guard before redirect`);
   }
 }
 
-// ── TYPE WRITER ──
-function typeWriter(text, el, speed=18){
-  el.style.opacity='1';
-  el.textContent='';
+// BUG #2 — Redirect Storm
+// pushState para 3 rotas em sequência rápida
+function bug2_redirectStorm(){
+  const routes=['/page-a','/page-b','/page-c',location.pathname];
+  routes.forEach((r,i)=>setTimeout(()=>{
+    history.pushState({},'',r);
+    toast('toast-a',`⚡ REDIRECT STORM ${i+1}/3<br>${r}<br>handlers: concurrent`,900);
+  },i*220));
+  typeWriter(`> REDIRECT STORM triggered\n> dispatching 3 simultaneous navigations\n> /page-a at t=0ms\n> /page-b at t=220ms\n> /page-c at t=440ms\n> last-write-wins: ACTIVE`);
+}
+
+// BUG #3 — Click Spam Bug
+// Registra a requisição duplicada no terminal SEM fazer fetch real
+let spamCount=0;
+function bug3_clickSpam(){
+  spamCount++;
+  toast('toast-b',`📨 CLICK SPAM #${spamCount}<br>POST /api/enviar disparo ${spamCount}x<br>sem debounce / sem lock`,2000);
+  typeWriter(`> CLICK SPAM: request #${spamCount}\n> POST /api/enviar\n> no idempotency_key\n> duplicated side-effects: ${spamCount}x\n> db writes queued: ${spamCount}`);
+}
+
+// BUG #4 — Double Submit Bug
+let submitCount=0;
+let submitLocked=false;
+function bug4_doubleSubmit(){
+  submitCount++;
+  if(!submitLocked){
+    submitLocked=true;
+    setTimeout(()=>submitLocked=false,3000);
+  }
+  toast('toast-b',`📋 DOUBLE SUBMIT #${submitCount}<br>form_id: chaos-engine<br>idempotency_key: null`,2200);
+  typeWriter(`> DOUBLE SUBMIT detected\n> submission #${submitCount}\n> idempotency_key: null\n> server: 409 CONFLICT on #2+\n> db record duplicated: ${Math.max(1,submitCount-1)}x`);
+}
+
+// BUG #5 — Race Condition de Navegação
+function bug5_raceCondition(){
+  const results=[];
+  const fast=new Promise(r=>setTimeout(()=>{results.push('fast:/list');r('/list');},Math.random()*400+100));
+  const slow=new Promise(r=>setTimeout(()=>{results.push('slow:/detail');r('/detail');},Math.random()*400+100));
+  Promise.all([fast,slow]).then(([a,b])=>{
+    const winner=a===b?a:(Math.random()>.5?a:b);
+    toast('toast-c',`🏎 RACE CONDITION<br>fast=${a} slow=${b}<br>winner (random): ${winner}`,3000);
+    typeWriter(`> RACE CONDITION\n> fast resolve: ${results[0]||'?'}\n> slow resolve: ${results[1]||'?'}\n> navigation winner: ${winner}\n> stale response wins: ${Math.random()>.5?'YES':'NO'}\n> out-of-order: ACTIVE`);
+  });
+}
+
+// BUG #6 — Event Handler Duplicado
+// Adiciona listener extra no próprio botão a cada ativação
+function bug6_dupHandler(){
+  dupHandlerCount++;
+  btn.addEventListener('click',function dupCb(){console.log(`dup handler #${dupHandlerCount} fired`);});
+  toast('toast-c',`🔄 EVENT DUP #${dupHandlerCount}<br>listener adicionado no btn<br>total handlers: ${1+dupHandlerCount}`,2500);
+  typeWriter(`> EVENT HANDLER DUPLICATION\n> listener registered: ${dupHandlerCount} times extra\n> component re-mounted without cleanup\n> click now fires: ${1+dupHandlerCount}x\n> memory: +${dupHandlerCount*12}KB leaked`);
+}
+
+// BUG #7 — State Desync
+function bug7_stateDesync(){
+  const uiSays='available';
+  const backendActual=Math.random()>.4?'sold_out':'available';
+  if(backendActual!==uiSays){
+    toast('toast-d',`👻 STATE DESYNC<br>ui=${uiSays} | backend=${backendActual}<br>action silently FAILED`,2800);
+    typeWriter(`> STATE DESYNC\n> ui_state: ${uiSays}\n> backend_state: ${backendActual}\n> button: appears clickable\n> action: FAILED silently\n> error shown: NO\n> user: confused`);
+  } else {
+    toast('toast-d',`✅ STATE SYNC<br>ui=${uiSays} | backend=${backendActual}<br>action OK (lucky)`,2000);
+    typeWriter(`> STATE OK (by chance)\n> ui_state: ${uiSays}\n> backend_state: ${backendActual}\n> race window: still open`);
+  }
+}
+
+// BUG #8 — Route Loop
+function bug8_routeLoop(){
+  routeLoopCount=0;
+  const routes=['/home','/app','/home','/app','/home'];
+  const iv=setInterval(()=>{
+    if(routeLoopCount>=routes.length){clearInterval(iv);history.pushState({},'',location.pathname);return;}
+    history.pushState({},"'",routes[routeLoopCount]);
+    toast('toast-a',`🔁 ROUTE LOOP<br>${routes[routeLoopCount]}<br>step ${routeLoopCount+1}/5`,800);
+    routeLoopCount++;
+  },350);
+  typeWriter(`> ROUTE LOOP\n> rule: /home → /app\n> rule: /app → /home\n> both rules active simultaneously\n> cycle detected after 2 hops\n> router: no cycle protection`);
+}
+
+// BUG #9 — Navigation Loop (modal ↔ rota)
+function bug9_navLoop(){
+  let modalOpen=false;
+  let loopN=0;
+  const iv=setInterval(()=>{
+    if(loopN++>=6){clearInterval(iv);history.pushState({},'',location.pathname);return;}
+    modalOpen=!modalOpen;
+    history.pushState({},"'",modalOpen?'/modal':'/list');
+    toast('toast-b',`🔂 NAV LOOP<br>${modalOpen?'/modal opens → closes /list':'/list → reopens /modal'}<br>step ${loopN}`,700);
+  },400);
+  typeWriter(`> NAVIGATION LOOP\n> modal close → pushState(/list)\n> /list guard → pushState(/modal)\n> modal opens again\n> cycle: INFINITE\n> history.length: growing`);
+}
+
+// BUG #10 — Debounce Ausente
+function bug10_noDebounce(show){
+  if(show){
+    debounceWrap.style.display='flex';
+    debounceInput.focus();
+    toast('toast-d','🔍 DEBOUNCE AUSENTE<br>cada tecla = 1 fetch()<br>observe o log abaixo',3000);
+    typeWriter(`> NO DEBOUNCE\n> input listener: raw 'input' event\n> every keystroke fires fetch()\n> 10 chars typed = 10 requests\n> server: flooded`);
+  } else {
+    debounceWrap.style.display='none';
+  }
+}
+let debounceReqN=0;
+debounceInput.addEventListener('input',e=>{
+  debounceReqN++;
+  debounceLog.innerHTML+=`REQ #${debounceReqN}: GET /api/search?q=${e.target.value||'_'}\n`;
+  debounceLog.scrollTop=debounceLog.scrollHeight;
+});
+
+// BUG #11 — Thundering Herd
+let herdQueue=[];
+function bug11_thunderingHerd(){
+  const n=Math.floor(8+Math.random()*12);
+  herdQueue=[];
+  for(let i=0;i<n;i++)herdQueue.push(`click_event_${i+1}`);
+  let proc=0;
+  const iv=setInterval(()=>{
+    if(!herdQueue.length){clearInterval(iv);return;}
+    proc++;
+    const ev=herdQueue.shift();
+    toast('toast-b',`⚡ THUNDERING HERD<br>processing: ${ev}<br>queue: ${herdQueue.length} remaining`,600);
+  },120);
+  typeWriter(`> THUNDERING HERD\n> ${n} click events queued simultaneously\n> no rate limiting on handler\n> server receives: ${n} concurrent requests\n> all treated as legitimate\n> downstream: cascade overload`);
+}
+
+// BUG #12 — UI Lock (bloqueio real de ~600ms no main thread)
+function bug12_uiLock(){
+  btn.textContent='💤 UI LOCKED...';
+  btn.style.opacity='.4';
+  typeWriter('> UI LOCK: heavy task starting on main thread\n> requestAnimationFrame: PAUSED\n> scroll: FROZEN\n> input: DEAD\n> ...');
+  // setTimeout dá um frame pro browser pintar a mensagem antes de bloquear
+  setTimeout(()=>{
+    const start=performance.now();
+    while(performance.now()-start<650){/*busy wait*/}
+    btn.textContent='⚡ INJECT CHAOS';
+    btn.style.opacity='';
+    toast('toast-c','🚨 UI LOCK ENDED<br>main thread blocked: 650ms<br>frames dropped: ~39',2500);
+    typeWriter('> UI LOCK duration: 650ms\n> frames dropped: ~39\n> [fix] use Web Worker or chunked async\n> ui_state: recovered');
+  },30);
+}
+
+// BUG #13 — Button Spam Crash
+let spamCrashN=0;
+function bug13_spamCrash(){
+  spamCrashN++;
+  // dispara animação + toast + navegação ao mesmo tempo
+  document.getElementById('chaos-title').classList.add('skew-once');
+  setTimeout(()=>document.getElementById('chaos-title').classList.remove('skew-once'),500);
+  toast('toast-a',`💥 SPAM CRASH #${spamCrashN}<br>animation + toast + nav fired<br>collision: ${spamCrashN>2?'LIKELY':'POSSIBLE'}`,1800);
+  history.pushState({},'',`?spam=${spamCrashN}`);
+  if(spamCrashN>=3){
+    toast('toast-c','💥 VISUAL COLLAPSE<br>3+ concurrent UI operations<br>state machine: undefined',2500);
+    typeWriter(`> BUTTON SPAM CRASH\n> concurrent ops: animation + toast + navigation\n> spam count: ${spamCrashN}\n> state machine: UNDEFINED\n> visual collapse: IMMINENT`);
+  } else {
+    typeWriter(`> SPAM CRASH #${spamCrashN}\n> animation started\n> toast queued\n> history pushed: ?spam=${spamCrashN}\n> next click may collide`);
+  }
+}
+
+// BUG #14 — Click Flood
+function bug14_clickFlood(){
+  const count=Math.floor(12+Math.random()*8);
+  toast('toast-d',`🌊 CLICK FLOOD<br>${count} events dispatched<br>queue: processing`,3000);
+  typeWriter(`> CLICK FLOOD\n> ${count} click events dispatched programmatically\n> no throttle / no debounce\n> handler runs ${count}x\n> side-effects: ${count}x`);
   let i=0;
   const iv=setInterval(()=>{
-    el.textContent+=text[i]||'';
-    i++;
-    if(i>=text.length)clearInterval(iv);
-  },speed);
+    if(i++>=count){clearInterval(iv);return;}
+    // log each flood event sem disparar o click real
+    display.textContent+=`\n> flood[${i}]: dispatched`;
+  },80);
 }
 
-// ── MELTDOWN SEQUENCE ──
-function triggerMeltdown(){
-  btn.classList.add('locked');
-  btn.textContent='💥 RATE LIMIT EXCEEDED';
-  document.body.classList.add('alarming');
-  statusBdg.textContent='☠ MELTDOWN';
-  footerSt.textContent='MELTDOWN';
-  rateStatus.textContent='LOCKED';
-
-  // terminal crash log
-  const crashLog=
-    '> [RATE LIMIT] 20/20 requests consumed\n'+
-    '> Thundering Herd: 47 event handlers fired\n'+
-    '> Infinite Redirect Loop:\n'+
-    '>   /login → /dashboard → /login → /dashboard → ...\n'+
-    '>   history.length: 312  stack: OVERFLOW\n'+
-    '> Double Submit: 9 duplicate writes to DB\n'+
-    '> Re-render Loop: 847 renders in 2s — UI: FROZEN\n'+
-    '> State Desync: ui=IDLE  backend=CRASHED\n'+
-    '> Navigation Loop: modal ↔ route cycling\n'+
-    '> Click Flood: queue depth 203\n'+
-    '> Debounce: absent\n'+
-    '> Button Spam Crash: toast/animation/nav collision\n'+
-    '> UI Lock: main thread blocked 8400ms\n'+
-    '> ──────────────────────────────────\n'+
-    zalgify('> SYSTEM MELTDOWN — RESTARTING IN 8s',3);
-
-  typeWriter(crashLog, display, 14);
-  bgChaos=5;
-
-  // 3 toasts simultaneously (Thundering Herd / Redirect Storm / State Desync)
-  showToast('toast-redirect',
-    '🔄 REDIRECT STORM<br>/login → /dashboard → /login → ...<br>Loop #∞ — history: OVERFLOW',
-    7500);
-  setTimeout(()=>showToast('toast-herd',
-    '⚡ THUNDERING HERD<br>47 handlers fired at once<br>Queue depth: 203 events pending',
-    7500),800);
-  setTimeout(()=>showToast('toast-desync',
-    '👻 STATE DESYNC<br>ui_state=IDLE | backend=CRASHED<br>Button clickable — action FAILS silently',
-    7500),1600);
-
-  // body skew animation every 600ms
-  let skewCount=0;
-  const skewIv=setInterval(()=>{
-    document.getElementById('chaos-title').classList.add('skew-once');
-    setTimeout(()=>document.getElementById('chaos-title').classList.remove('skew-once'),500);
-    if(++skewCount>10)clearInterval(skewIv);
-  },600);
-
-  // meltdown overlay text
-  setTimeout(()=>{
-    meltOverlay.style.display='flex';
-    meltOverlay.style.background='rgba(0,0,0,0)';
-    setTimeout(()=>{
-      meltOverlay.style.background='rgba(0,0,0,.0)';
-      meltMsg.style.opacity='1';
-      meltMsg.innerHTML=
-        zalgify('SYSTEM COLLAPSED',3)+'<br>'+
-        '<span style="font-size:.7em;color:#ff00ff">'+zalgify('rate_limit=20  consumed=20  queue=OVERFLOW',2)+'</span><br>'+
-        '<span style="font-size:.55em;color:#888;margin-top:.5rem;display:block">restarting in 8s…</span>';
-    },100);
-  },2200);
-
-  // reload after 8s
-  setTimeout(()=>location.reload(),8000);
+// BUG #15 — Re-render Loop
+let reRenderCount=0;
+let reRenderActive=false;
+function bug15_rerenderLoop(){
+  if(reRenderActive){reRenderActive=false;renderCtr.style.display='none';typeWriter('> RE-RENDER LOOP: stopped manually\n> [fix] check useEffect deps / avoid setState in render');return;}
+  reRenderActive=true;
+  reRenderCount=0;
+  renderCtr.style.display='block';
+  toast('toast-c','🔁 RE-RENDER LOOP<br>clique novamente para parar<br>CPU: escalando',3000);
+  typeWriter('> RE-RENDER LOOP started\n> useEffect → setState → render → useEffect → ...\n> clique INJECT again to stop');
+  function step(){
+    if(!reRenderActive)return;
+    reRenderCount++;
+    renderCtr.textContent=`🔁 RE-RENDER #${reRenderCount} — CPU: ${Math.min(99,40+Math.round(reRenderCount/8))}% — clique INJECT para parar`;
+    if(reRenderCount<300)requestAnimationFrame(step);
+    else{reRenderActive=false;renderCtr.textContent=`⚠️ RE-RENDER LOOP: ${reRenderCount} renders — limite de segurança alcançado`;}
+  }
+  requestAnimationFrame(step);
 }
 
-// ── MAIN CLICK HANDLER ──
+/* ── BUG CARD CLICK ── */
+const bugFns=[null,bug1_redirectLoop,bug2_redirectStorm,bug3_clickSpam,bug4_doubleSubmit,bug5_raceCondition,bug6_dupHandler,bug7_stateDesync,bug8_routeLoop,bug9_navLoop,()=>bug10_noDebounce(debounceWrap.style.display==='none'||debounceWrap.style.display===''),bug11_thunderingHerd,bug12_uiLock,bug13_spamCrash,bug14_clickFlood,bug15_rerenderLoop];
+document.querySelectorAll('.bug-card').forEach(card=>{
+  card.addEventListener('click',()=>{
+    const n=+card.dataset.bug;
+    document.querySelectorAll('.bug-card').forEach(c=>c.classList.remove('active'));
+    card.classList.add('active');
+    bugLabel.textContent=card.querySelector('.bug-name').textContent;
+    if(bugFns[n])bugFns[n]();
+    bgChaos=Math.min(bgChaos+.5,2);
+    setTimeout(()=>card.classList.remove('active'),600);
+    card.classList.add('triggered');
+    setTimeout(()=>card.classList.remove('triggered'),2000);
+  });
+});
+
+/* ── CLICK COUNTER (INJECT btn) — RATE LIMIT 20 ── */
+const phaseLogs=[
+  ['> entropy_seed=0x'+Math.floor(Math.random()*0xFFFFFF).toString(16).toUpperCase()+'\n> chaos_level: LOW\n> pipeline: accepting\n> status: OK',
+   '> MUTATE temp=1.3 top_p=0.88\n> weights: drifting\n> hallucination: 12%'],
+  ['> DUPLICATE REQUEST detected\n> queue_depth: '+Math.floor(4+Math.random()*10)+'\n> race_condition: ACTIVE\n> responses out-of-order: YES',
+   '> DOUBLE SUBMIT\n> idempotency_key: null\n> 409 CONFLICT',
+   '> EVENT HANDLERS: '+(8+Math.random()*10|0)+'\n> same listener x'+Math.floor(3+Math.random()*5)+'\n> memory: leaking'],
+  [zalgify('> STATE DESYNC\n> ui=IDLE backend=CRASHED\n> action WILL FAIL silently',1.3),
+   zalgify('> RE-RENDER LOOP\n> render#'+(80+Math.random()*400|0)+'\n> CPU: 98%\n> UI: FROZEN',1.5),
+   zalgify('> NAVIGATION LOOP\n> /chaos → /inject → /chaos → ...\n> history: OVERFLOW',1.6)]
+];
+
 btn.addEventListener('click',()=>{
   if(btn.classList.contains('locked'))return;
+  // BUG #15 toggle check
+  if(reRenderActive){bug15_rerenderLoop();return;}
+
   clickCount++;
-  updateUI(clickCount);
+  updateMeter(clickCount);
   bgChaos=Math.min(bgChaos+.4,3);
 
-  if(clickCount>=LIMIT){
-    triggerMeltdown();
-    return;
-  }
-
   const phase=getPhase(clickCount);
-  const pool=phaseLogs[phase];
-  const log=pool[Math.floor(Math.random()*pool.length)];
+  if(phase>=1)setPhaseStyle(phase);
 
-  // phase-specific side effects
-  if(phase===1 && clickCount%3===0){
-    // show redirect toast occasionally
-    showToast('toast-redirect',
-      '🔄 REDIRECT: /chaos → /inject → /chaos<br>Loops: '+(clickCount*2)+'  debounce: absent',
-      2500);
-  }
+  if(clickCount>=LIMIT){triggerMeltdown();return;}
+
+  const pool=phaseLogs[phase]||phaseLogs[2];
+  typeWriter(pool[Math.floor(Math.random()*pool.length)]+(phase>0?'\n> req_id: '+Math.random().toString(36).slice(2,10):''),phase===2?8:15);
+
+  if(phase===1&&clickCount%3===0)toast('toast-a',`🔄 REDIRECT: /chaos → /inject → /chaos<br>loops: ${clickCount*2}  debounce: absent`,2200);
   if(phase===2){
-    // race condition toast
-    showToast('toast-herd',
-      '⚡ RACE CONDITION<br>'+clickCount+' responses queued<br>Out-of-order execution: ACTIVE',
-      2000);
+    toast('toast-c',`⚡ RACE CONDITION<br>${clickCount} responses queued<br>out-of-order: ACTIVE`,1800);
     document.getElementById('chaos-title').classList.add('skew-once');
     setTimeout(()=>document.getElementById('chaos-title').classList.remove('skew-once'),500);
   }
-
-  typeWriter(log+(phase>0?'\n> req_id: '+Math.random().toString(36).slice(2,10):''), display, phase===2?8:14);
 });
+
+/* ── MELTDOWN ── */
+function triggerMeltdown(){
+  btn.classList.add('locked');btn.textContent='💥 RATE LIMIT EXCEEDED';
+  document.body.classList.add('alarming');
+  statusBdg.textContent='☠ MELTDOWN';footerSt.textContent='MELTDOWN';rateStatus.textContent='LOCKED';
+  const log=
+    '> [RATE LIMIT] 20/20 consumed\n'
+    +'> ALL 15 BUGS TRIGGERED:\n'
+    +'>  #01 Infinite Redirect Loop — history: OVERFLOW\n'
+    +'>  #02 Redirect Storm — 3 routes concurrent\n'
+    +'>  #03 Click Spam — '+spamCount+' duplicate reqs\n'
+    +'>  #04 Double Submit — '+submitCount+' writes to DB\n'
+    +'>  #05 Race Condition — stale response wins\n'
+    +'>  #06 Event Dup — '+dupHandlerCount+' extra handlers\n'
+    +'>  #07 State Desync — ui=IDLE backend=CRASHED\n'
+    +'>  #08 Route Loop — /home ↔ /app cycling\n'
+    +'>  #09 Navigation Loop — modal ↔ route\n'
+    +'>  #10 Debounce Absent — '+debounceReqN+' reqs fired\n'
+    +'>  #11 Thundering Herd — queue flood\n'
+    +'>  #12 UI Lock — 650ms main thread blocked\n'
+    +'>  #13 Button Spam Crash — collision x'+spamCrashN+'\n'
+    +'>  #14 Click Flood — 20 events dispatched\n'
+    +'>  #15 Re-render Loop — '+reRenderCount+' renders\n'
+    +'> ──────────────────────────────\n'
+    +zalgify('> SYSTEM MELTDOWN — RESTART IN 8s',3);
+  typeWriter(log,11);
+  bgChaos=5;
+  toast('toast-a','🔄 REDIRECT STORM<br>/login → /dashboard → /login → ...<br>Loop #∞ — history: OVERFLOW',7500);
+  setTimeout(()=>toast('toast-b','⚡ THUNDERING HERD<br>47 handlers fired at once<br>Queue: 203 events pending',7500),800);
+  setTimeout(()=>toast('toast-c','👻 STATE DESYNC<br>ui=IDLE | backend=CRASHED<br>button clickable — action FAILS',7500),1600);
+  setTimeout(()=>toast('toast-d','💾 RE-RENDER LOOP<br>'+reRenderCount+' renders triggered<br>CPU: 99% — UI: FROZEN',7500),2400);
+  let sk=0;const skIv=setInterval(()=>{document.getElementById('chaos-title').classList.add('skew-once');setTimeout(()=>document.getElementById('chaos-title').classList.remove('skew-once'),500);if(++sk>10)clearInterval(skIv);},550);
+  setTimeout(()=>{
+    meltOverlay.style.display='flex';
+    setTimeout(()=>{
+      meltMsg.style.opacity='1';
+      meltMsg.innerHTML=zalgify('ALL BUGS COLLAPSED',3)+'<br><span style="font-size:.65em;color:#ff00ff">'+zalgify('rate_limit=20  bugs=15  queue=OVERFLOW',2)+'</span><br><span style="font-size:.5em;color:#666;display:block;margin-top:.4rem">restarting in 8s…</span>';
+    },100);
+  },2600);
+  setTimeout(()=>location.reload(),8000);
+}
 </script>
 </body>
 </html>
