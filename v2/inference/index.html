@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>0API // /v2/inference</title>
+<link rel="shortcut icon" href="../../icon.png" type="image/png">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;overflow-x:hidden;background:#050505;color:#fff;font-family:'Rajdhani',sans-serif;user-select:none}
+#canvas-container{position:fixed;inset:0;z-index:0}
+#main-interface{position:relative;z-index:10;pointer-events:none;min-height:100dvh;display:flex;flex-direction:column;justify-content:space-between;padding:clamp(1rem,3vw,2rem);padding-bottom:calc(clamp(1rem,3vw,2rem) + env(safe-area-inset-bottom,0px));background:radial-gradient(circle at center,transparent 0%,rgba(0,0,0,.65) 100%)}
+.glitch-text{font-family:'Share Tech Mono',monospace;animation:glitch-main 3s infinite linear alternate-reverse}
+@keyframes glitch-main{0%{text-shadow:-2px 0 #f59e0b,2px 0 #ff4500}2%{text-shadow:2px 0 #f59e0b,-2px 0 #ff4500}4%{text-shadow:-2px 0 #f59e0b,2px 0 #ff4500}5%{text-shadow:none}100%{text-shadow:none}}
+.glass-panel{background:rgba(20,12,5,.4);backdrop-filter:blur(10px);border:1px solid rgba(245,158,11,.15);box-shadow:0 4px 30px rgba(0,0,0,.5);transition:all .3s ease;border-radius:2px}
+.info-card:hover{border-color:rgba(245,158,11,.5);box-shadow:0 0 18px rgba(245,158,11,.25);transform:translateY(-2px)}
+.scanlines{position:fixed;inset:0;background:repeating-linear-gradient(to bottom,transparent 0px,transparent 2px,rgba(0,0,0,.18) 2px,rgba(0,0,0,.18) 4px);pointer-events:none;z-index:20;opacity:.5}
+.corner{position:fixed;width:28px;height:28px;z-index:15;pointer-events:none}
+.corner-tl{top:12px;left:12px;border-top:1px solid #f59e0b;border-left:1px solid #f59e0b}
+.corner-tr{top:12px;right:12px;border-top:1px solid #f59e0b;border-right:1px solid #f59e0b}
+.corner-bl{bottom:18px;left:12px;border-bottom:1px solid #f59e0b;border-left:1px solid #f59e0b}
+.corner-br{bottom:18px;right:12px;border-bottom:1px solid #f59e0b;border-right:1px solid #f59e0b}
+@media(max-width:480px){.corner{display:none}}
+.instability-container{position:fixed;bottom:0;left:0;width:100%;height:6px;background:#111;z-index:50}
+#instability-bar{width:0%;height:100%;background:linear-gradient(90deg,#f59e0b,#ff4500,#ff0000);box-shadow:0 0 12px #f59e0b;transition:width .08s linear}
+.btn-infer{background:transparent;border:2px solid #f59e0b;color:#f59e0b;text-transform:uppercase;font-family:'Share Tech Mono',monospace;letter-spacing:2px;cursor:pointer;padding:clamp(10px,2vw,14px) clamp(20px,5vw,36px);min-height:44px;transition:all .2s ease;white-space:nowrap;pointer-events:auto}
+.btn-infer:hover{box-shadow:0 0 24px rgba(245,158,11,.5)}
+.btn-infer:active{background:rgba(245,158,11,.15)}
+.field-input{background:rgba(20,12,5,.7);border:1px solid rgba(245,158,11,.2);color:#fcd34d;font-family:'Share Tech Mono',monospace;font-size:.85rem;padding:.5rem .75rem;outline:none;transition:border .2s;border-radius:2px;pointer-events:auto;width:100%;resize:vertical}
+.field-input:focus{border-color:rgba(245,158,11,.7);box-shadow:0 0 8px rgba(245,158,11,.2)}
+.field-input::placeholder{color:rgba(245,158,11,.3)}
+.field-label{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:#f59e0b;letter-spacing:.15em;text-transform:uppercase}
+#stream-output{font-family:'Share Tech Mono',monospace;font-size:.75rem;color:#fcd34d;opacity:0;transition:opacity .3s;background:rgba(20,12,5,.5);border:1px solid rgba(245,158,11,.2);padding:.75rem;border-radius:2px;width:100%;min-height:80px;max-height:180px;overflow-y:auto;white-space:pre-wrap;pointer-events:auto;line-height:1.6}
+.model-badge{display:inline-block;padding:2px 8px;border:1px solid rgba(245,158,11,.4);color:#f59e0b;font-family:'Share Tech Mono',monospace;font-size:.6rem;letter-spacing:.1em;border-radius:2px}
+</style>
+</head>
+<body>
+<div id="canvas-container"></div>
+<div class="scanlines"></div>
+<div class="corner corner-tl"></div><div class="corner corner-tr"></div>
+<div class="corner corner-bl"></div><div class="corner corner-br"></div>
+<div class="instability-container"><div id="instability-bar"></div></div>
+
+<div id="main-interface">
+  <header class="flex justify-between items-center w-full max-w-7xl mx-auto pointer-events-auto gap-2">
+    <a href="../../" class="text-xl font-bold tracking-widest text-amber-400 font-mono hover:text-amber-300 transition-colors">← 0API <span class="text-orange-500">//</span> MONSTER</a>
+    <div class="inline-flex items-center px-3 py-1 border border-yellow-500/50 bg-yellow-900/20 text-xs font-mono tracking-widest rounded-sm shrink-0">
+      <span class="text-yellow-300 font-bold">HEAVY LOAD</span>
+    </div>
+  </header>
+
+  <main class="flex-1 flex flex-col justify-center w-full max-w-4xl mx-auto px-2 md:px-4 pointer-events-auto z-20 py-6 gap-6">
+    <div class="text-center">
+      <h1 class="glitch-text text-white font-bold tracking-widest" style="font-size:clamp(1.8rem,8vw,3.5rem)">
+        /v2/<span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-red-500">inference</span>
+      </h1>
+      <p class="text-gray-400 font-mono mt-2 text-xs">LLM Streaming • Completions • Procedural Gen • Sampling</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="glass-panel info-card p-4 relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-0.5 bg-amber-500"></div>
+        <h3 class="font-mono text-amber-300 text-sm mb-1">POST /complete</h3>
+        <p class="text-xs text-gray-400">Completions com sampling configurável (temp, top-p, top-k).</p>
+        <div class="mt-3 font-mono text-[10px] text-gray-500 border-t border-gray-800 pt-2 flex justify-between">
+          <span>850ms</span><span class="text-amber-400">ACTIVE</span>
+        </div>
+      </div>
+      <div class="glass-panel info-card p-4 relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-0.5 bg-orange-500"></div>
+        <h3 class="font-mono text-orange-300 text-sm mb-1">POST /stream</h3>
+        <p class="text-xs text-gray-400">SSE streaming token-by-token para UIs reativas.</p>
+        <div class="mt-3 font-mono text-[10px] text-gray-500 border-t border-gray-800 pt-2 flex justify-between">
+          <span>TTFT: 320ms</span><span class="text-amber-400">ACTIVE</span>
+        </div>
+      </div>
+      <div class="glass-panel info-card p-4 relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-0.5 bg-red-500"></div>
+        <h3 class="font-mono text-red-300 text-sm mb-1">POST /batch</h3>
+        <p class="text-xs text-gray-400">Inferência em lote com fila assíncrona prioritária.</p>
+        <div class="mt-3 font-mono text-[10px] text-gray-500 border-t border-gray-800 pt-2 flex justify-between">
+          <span>2.1s</span><span class="text-amber-400">ACTIVE</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="glass-panel p-5 flex flex-col gap-4 max-w-lg w-full mx-auto">
+      <div class="flex items-center justify-between">
+        <p class="text-xs font-mono text-amber-500 tracking-widest">// DEMO — LLM STREAM</p>
+        <span class="model-badge">monster-7b</span>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="field-label">prompt</span>
+        <textarea class="field-input" id="prompt-input" rows="3" placeholder="Explique o caos computacional em uma frase..."></textarea>
+      </div>
+      <button class="btn-infer" id="infer-btn">▶ RUN INFERENCE</button>
+      <div id="stream-output"></div>
+    </div>
+  </main>
+
+  <footer class="text-xs text-gray-500 font-mono w-full max-w-7xl mx-auto pointer-events-auto">
+    <div class="flex justify-between">
+      <span>ENDPOINT: /v2/inference &bull; MODEL: monster-7b &bull; REQ/S: 9k</span>
+      <span>0API.MONSTER V2.0.4</span>
+    </div>
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const scene=new THREE.Scene();
+scene.fog=new THREE.FogExp2(0x000000,.04);
+const camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,100);
+camera.position.set(0,1.5,11);
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+renderer.setSize(innerWidth,innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+document.getElementById('canvas-container').appendChild(renderer.domElement);
+const N=2800,pGeo=new THREE.BufferGeometry();
+const pPos=new Float32Array(N*3),pCol=new Float32Array(N*3);
+for(let i=0;i<N;i++){pPos[i*3]=(Math.random()-.5)*30;pPos[i*3+1]=(Math.random()-.5)*30;pPos[i*3+2]=(Math.random()-.5)*30;
+const t=Math.random();
+pCol[i*3]=1;pCol[i*3+1]=.4+t*.2;pCol[i*3+2]=0;}
+pGeo.setAttribute('position',new THREE.BufferAttribute(pPos,3));
+pGeo.setAttribute('color',new THREE.BufferAttribute(pCol,3));
+const pMat=new THREE.PointsMaterial({size:.06,vertexColors:true,transparent:true,opacity:.7});
+const pts=new THREE.Points(pGeo,pMat);scene.add(pts);
+const cGeo=new THREE.ConeGeometry(2,5,8,1);
+const cMat=new THREE.MeshBasicMaterial({color:0xf59e0b,wireframe:true,transparent:true,opacity:.08});
+const cone=new THREE.Mesh(cGeo,cMat);scene.add(cone);
+const grid=new THREE.GridHelper(50,35,0xf59e0b,0x1a0800);
+grid.position.y=-6;grid.material.transparent=true;grid.material.opacity=.2;scene.add(grid);
+window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+(function loop(){requestAnimationFrame(loop);pts.rotation.y+=.0007;cone.rotation.y+=.004;cone.rotation.x+=.001;grid.rotation.y+=.002;renderer.render(scene,camera);})();
+
+const bar=document.getElementById('instability-bar');
+const responses=[
+  'O caos computacional é a emergência de comportamento imprevisível em sistemas determinísticos com alta sensibilidade às condições iniciais.',
+  'Sistemas complexos colidem com entropia máxima quando os pesos do modelo excedem o threshold de instabilidade quântica.',
+  'A inferência no limite do colapso produz tokens que reescrevem sua própria função de probabilidade em tempo real.',
+  'Monster-7b processa linguagem como um campo de força: cada token dobra o espaço semântico ao redor de si mesmo.'
+];
+
+document.getElementById('infer-btn').addEventListener('click',()=>{
+  const out=document.getElementById('stream-output');
+  out.style.opacity='1';
+  out.textContent='';
+  bar.style.width='80%';
+  const resp=responses[Math.random()*responses.length|0];
+  let i=0;
+  const iv=setInterval(()=>{
+    if(i>=resp.length){clearInterval(iv);bar.style.width='0%';out.textContent=resp;return;}
+    out.textContent=resp.slice(0,i+1)+'▌';
+    i+=Math.random()>.7?2:1;
+    out.scrollTop=out.scrollHeight;
+  },28);
+});
+</script>
+</body>
+</html>

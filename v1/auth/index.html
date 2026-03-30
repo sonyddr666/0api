@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>0API // /v1/auth</title>
+<link rel="shortcut icon" href="../../icon.png" type="image/png">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;overflow-x:hidden;background:#050505;color:#fff;font-family:'Rajdhani',sans-serif;user-select:none}
+#canvas-container{position:fixed;inset:0;z-index:0}
+#main-interface{position:relative;z-index:10;pointer-events:none;min-height:100dvh;display:flex;flex-direction:column;justify-content:space-between;padding:clamp(1rem,3vw,2rem);padding-bottom:calc(clamp(1rem,3vw,2rem) + env(safe-area-inset-bottom,0px));background:radial-gradient(circle at center,transparent 0%,rgba(0,0,0,.65) 100%)}
+.glitch-text{font-family:'Share Tech Mono',monospace;animation:glitch-main 3s infinite linear alternate-reverse}
+@keyframes glitch-main{0%{text-shadow:-2px 0 #0f0,2px 0 #0ff}2%{text-shadow:2px 0 #0f0,-2px 0 #0ff}4%{text-shadow:-2px 0 #0f0,2px 0 #0ff}5%{text-shadow:none}100%{text-shadow:none}}
+.glass-panel{background:rgba(10,15,20,.4);backdrop-filter:blur(10px);border:1px solid rgba(0,255,100,.1);box-shadow:0 4px 30px rgba(0,0,0,.5);transition:all .3s ease;border-radius:2px}
+.info-card:hover{border-color:rgba(0,255,100,.5);box-shadow:0 0 18px rgba(0,255,100,.25);transform:translateY(-2px)}
+.scanlines{position:fixed;inset:0;background:repeating-linear-gradient(to bottom,transparent 0px,transparent 2px,rgba(0,0,0,.18) 2px,rgba(0,0,0,.18) 4px);pointer-events:none;z-index:20;opacity:.5}
+.corner{position:fixed;width:28px;height:28px;z-index:15;pointer-events:none}
+.corner-tl{top:12px;left:12px;border-top:1px solid #0f0;border-left:1px solid #0f0}
+.corner-tr{top:12px;right:12px;border-top:1px solid #0f0;border-right:1px solid #0f0}
+.corner-bl{bottom:18px;left:12px;border-bottom:1px solid #0f0;border-left:1px solid #0f0}
+.corner-br{bottom:18px;right:12px;border-bottom:1px solid #0f0;border-right:1px solid #0f0}
+@media(max-width:480px){.corner{display:none}}
+.instability-container{position:fixed;bottom:0;left:0;width:100%;height:6px;background:#111;z-index:50}
+#instability-bar{width:0%;height:100%;background:linear-gradient(90deg,#0f0,#0ff,#fff);box-shadow:0 0 12px #0f0;transition:width .08s linear}
+.btn-auth{background:transparent;border:2px solid #0f0;color:#0f0;text-transform:uppercase;font-family:'Share Tech Mono',monospace;letter-spacing:2px;cursor:pointer;position:relative;overflow:hidden;box-shadow:0 0 10px rgba(0,255,0,.2);padding:clamp(10px,2vw,14px) clamp(20px,5vw,36px);min-height:44px;transition:all .2s ease;white-space:nowrap}
+.btn-auth:hover{box-shadow:0 0 24px rgba(0,255,0,.5)}
+.btn-auth:active{background:rgba(0,255,0,.15);border-color:#0ff;color:#fff}
+.field-row{display:flex;flex-direction:column;gap:.25rem;width:100%}
+.field-label{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:#0f0;letter-spacing:.15em;text-transform:uppercase}
+.field-input{background:rgba(0,20,10,.6);border:1px solid rgba(0,255,100,.2);color:#0ff;font-family:'Share Tech Mono',monospace;font-size:.85rem;padding:.5rem .75rem;outline:none;transition:border .2s;border-radius:2px;pointer-events:auto;width:100%}
+.field-input:focus{border-color:rgba(0,255,100,.7);box-shadow:0 0 8px rgba(0,255,100,.2)}
+.field-input::placeholder{color:rgba(0,255,100,.3)}
+#token-display{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:#0ff;word-break:break-all;opacity:0;transition:opacity .5s;background:rgba(0,30,15,.5);border:1px solid rgba(0,255,100,.2);padding:.75rem;border-radius:2px;width:100%;max-width:640px;pointer-events:auto}
+.status-dot{width:8px;height:8px;border-radius:50%;background:#0f0;box-shadow:0 0 6px #0f0;animation:pulse-dot 2s infinite}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.3}}
+</style>
+</head>
+<body>
+<div id="canvas-container"></div>
+<div class="scanlines"></div>
+<div class="corner corner-tl"></div><div class="corner corner-tr"></div>
+<div class="corner corner-bl"></div><div class="corner corner-br"></div>
+<div class="instability-container"><div id="instability-bar"></div></div>
+
+<div id="main-interface">
+  <header class="flex justify-between items-center w-full max-w-7xl mx-auto pointer-events-auto gap-2">
+    <a href="../../" class="text-xl font-bold tracking-widest text-green-400 font-mono hover:text-green-300 transition-colors">← 0API <span class="text-cyan-500">//</span> MONSTER</a>
+    <div class="inline-flex items-center px-3 py-1 border border-green-500/50 bg-green-900/20 text-xs font-mono tracking-widest rounded-sm shrink-0">
+      <div class="status-dot mr-2"></div>
+      <span class="text-green-300 font-bold">AUTH ONLINE</span>
+    </div>
+  </header>
+
+  <main class="flex-1 flex flex-col justify-center w-full max-w-4xl mx-auto px-2 md:px-4 pointer-events-auto z-20 py-6 gap-6">
+    <div class="text-center">
+      <h1 class="glitch-text text-white font-bold tracking-widest" style="font-size:clamp(1.8rem,8vw,3.5rem)">
+        /v1/<span class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-cyan-400">auth</span>
+      </h1>
+      <p class="text-gray-400 font-mono mt-2 text-xs">Identidade • JWT • Permissões • Sessions</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="glass-panel info-card p-4 relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-0.5 bg-green-500"></div>
+        <h3 class="font-mono text-green-300 text-sm mb-1">POST /token</h3>
+        <p class="text-xs text-gray-400">Gera JWT com claims customizados e TTL configurável.</p>
+        <div class="mt-3 font-mono text-[10px] text-gray-500 border-t border-gray-800 pt-2 flex justify-between">
+          <span>12ms</span><span class="text-green-400">ACTIVE</span>
+        </div>
+      </div>
+      <div class="glass-panel info-card p-4 relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-0.5 bg-cyan-500"></div>
+        <h3 class="font-mono text-cyan-300 text-sm mb-1">POST /refresh</h3>
+        <p class="text-xs text-gray-400">Renova tokens expirados via refresh token seguro.</p>
+        <div class="mt-3 font-mono text-[10px] text-gray-500 border-t border-gray-800 pt-2 flex justify-between">
+          <span>8ms</span><span class="text-green-400">ACTIVE</span>
+        </div>
+      </div>
+      <div class="glass-panel info-card p-4 relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-0.5 bg-green-500"></div>
+        <h3 class="font-mono text-green-300 text-sm mb-1">POST /revoke</h3>
+        <p class="text-xs text-gray-400">Invalida tokens e encerra sessões ativas.</p>
+        <div class="mt-3 font-mono text-[10px] text-gray-500 border-t border-gray-800 pt-2 flex justify-between">
+          <span>5ms</span><span class="text-green-400">ACTIVE</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="glass-panel p-5 flex flex-col gap-4 max-w-lg w-full mx-auto">
+      <p class="text-xs font-mono text-green-500 tracking-widest">// DEMO — GERAR TOKEN JWT</p>
+      <div class="field-row">
+        <span class="field-label">client_id</span>
+        <input class="field-input" id="f-client" placeholder="monster_client_001" />
+      </div>
+      <div class="field-row">
+        <span class="field-label">scope</span>
+        <input class="field-input" id="f-scope" placeholder="read write admin" />
+      </div>
+      <button class="btn-auth" id="gen-btn">GENERATE TOKEN</button>
+      <div id="token-display"></div>
+    </div>
+  </main>
+
+  <footer class="text-xs text-gray-500 font-mono w-full max-w-7xl mx-auto pointer-events-auto">
+    <div class="flex justify-between">
+      <span>ENDPOINT: /v1/auth &bull; LATENCY: 12ms &bull; REQ/S: 45k</span>
+      <span>0API.MONSTER V2.0.4</span>
+    </div>
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const scene=new THREE.Scene();
+scene.fog=new THREE.FogExp2(0x000000,.05);
+const camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,100);
+camera.position.set(0,1.5,11);
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+renderer.setSize(innerWidth,innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+document.getElementById('canvas-container').appendChild(renderer.domElement);
+const N=2500,pGeo=new THREE.BufferGeometry();
+const pPos=new Float32Array(N*3),pCol=new Float32Array(N*3);
+for(let i=0;i<N;i++){pPos[i*3]=(Math.random()-.5)*30;pPos[i*3+1]=(Math.random()-.5)*30;pPos[i*3+2]=(Math.random()-.5)*30;
+if(Math.random()>.5){pCol[i*3]=0;pCol[i*3+1]=1;pCol[i*3+2]=.3;}else{pCol[i*3]=0;pCol[i*3+1]=1;pCol[i*3+2]=1;}}
+pGeo.setAttribute('position',new THREE.BufferAttribute(pPos,3));
+pGeo.setAttribute('color',new THREE.BufferAttribute(pCol,3));
+const pMat=new THREE.PointsMaterial({size:.06,vertexColors:true,transparent:true,opacity:.7});
+const pts=new THREE.Points(pGeo,pMat);scene.add(pts);
+const geo=new THREE.OctahedronGeometry(3,0);
+const mat=new THREE.MeshBasicMaterial({color:0x00ff44,wireframe:true,transparent:true,opacity:.08});
+const mesh=new THREE.Mesh(geo,mat);scene.add(mesh);
+const grid=new THREE.GridHelper(50,35,0x00ff44,0x003311);
+grid.position.y=-6;grid.material.transparent=true;grid.material.opacity=.2;scene.add(grid);
+window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+(function loop(){requestAnimationFrame(loop);pts.rotation.y+=.0008;pts.rotation.x+=.0004;mesh.rotation.y+=.003;mesh.rotation.x+=.002;grid.rotation.y+=.002;renderer.render(scene,camera);})();
+
+let heat=0,iv;
+const bar=document.getElementById('instability-bar');
+document.getElementById('gen-btn').addEventListener('click',()=>{
+  const client=document.getElementById('f-client').value||'monster_client_001';
+  const scope=document.getElementById('f-scope').value||'read write';
+  const b64=(s)=>btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+  const h=b64(JSON.stringify({alg:'HS256',typ:'JWT'}));
+  const p=b64(JSON.stringify({sub:client,iat:Date.now()/1000|0,exp:(Date.now()/1000|0)+3600,scope:scope.split(' '),iss:'0api.monster'}));
+  const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+  const sig=Array.from({length:43},()=>chars[Math.random()*chars.length|0]).join('');
+  const td=document.getElementById('token-display');
+  td.textContent=`${h}.${p}.${sig}`;
+  td.style.opacity='1';
+  heat=Math.min(heat+25,100);
+  bar.style.width=heat+'%';
+  clearTimeout(iv);
+  iv=setTimeout(()=>{heat=0;bar.style.width='0%';},3000);
+});
+</script>
+</body>
+</html>

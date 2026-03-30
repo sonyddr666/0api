@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>0API // /v0/chaos</title>
+<link rel="shortcut icon" href="../../icon.png" type="image/png">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;overflow-x:hidden;background:#050505;color:#fff;font-family:'Rajdhani',sans-serif;user-select:none}
+#canvas-container{position:fixed;inset:0;z-index:0}
+#main-interface{position:relative;z-index:10;pointer-events:none;min-height:100dvh;display:flex;flex-direction:column;justify-content:space-between;padding:clamp(1rem,3vw,2rem);padding-bottom:calc(clamp(1rem,3vw,2rem) + env(safe-area-inset-bottom,0px));background:radial-gradient(circle at center,transparent 0%,rgba(0,0,0,.65) 100%)}
+.glitch-text{font-family:'Share Tech Mono',monospace;animation:glitch-chaos .5s infinite linear alternate-reverse}
+@keyframes glitch-chaos{0%{text-shadow:-4px 0 #ff0000,4px 0 #ff00ff,0 2px #ff6600}20%{text-shadow:4px 0 #ff0000,-4px 0 #ff00ff,0 -2px #ff6600}40%{text-shadow:-2px 2px #ff0000,2px -2px #ff00ff;transform:skewX(-3deg)}60%{text-shadow:2px 2px #ff0000,-2px -2px #ff00ff;transform:skewX(3deg)}80%{text-shadow:none;transform:skewX(0)}100%{text-shadow:-4px 0 #ff0000,4px 0 #ff00ff}}
+.glass-panel{background:rgba(20,5,5,.4);backdrop-filter:blur(10px);border:1px solid rgba(255,0,0,.2);box-shadow:0 4px 30px rgba(0,0,0,.5);transition:all .3s ease;border-radius:2px}
+.info-card:hover{border-color:rgba(255,0,0,.6);box-shadow:0 0 20px rgba(255,0,0,.3);transform:translateY(-2px)}
+.scanlines{position:fixed;inset:0;background:repeating-linear-gradient(to bottom,transparent 0px,transparent 2px,rgba(0,0,0,.18) 2px,rgba(0,0,0,.18) 4px);pointer-events:none;z-index:20;opacity:.5}
+.corner{position:fixed;width:28px;height:28px;z-index:15;pointer-events:none}
+.corner-tl{top:12px;left:12px;border-top:1px solid #ff0000;border-left:1px solid #ff0000}
+.corner-tr{top:12px;right:12px;border-top:1px solid #ff0000;border-right:1px solid #ff0000}
+.corner-bl{bottom:18px;left:12px;border-bottom:1px solid #ff0000;border-left:1px solid #ff0000}
+.corner-br{bottom:18px;right:12px;border-bottom:1px solid #ff0000;border-right:1px solid #ff0000}
+@media(max-width:480px){.corner{display:none}}
+.instability-container{position:fixed;bottom:0;left:0;width:100%;height:6px;background:#111;z-index:50}
+#instability-bar{width:100%;height:100%;background:linear-gradient(90deg,#ff0000,#ff00ff,#ffffff);box-shadow:0 0 12px #ff0000;animation:bar-pulse 1s infinite}
+@keyframes bar-pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.btn-chaos{background:transparent;border:2px solid #ff0000;color:#ff0000;text-transform:uppercase;font-family:'Share Tech Mono',monospace;letter-spacing:2px;cursor:pointer;padding:clamp(10px,2vw,14px) clamp(20px,5vw,36px);min-height:44px;transition:all .2s ease;white-space:nowrap;pointer-events:auto;animation:btn-glow 2s infinite}
+@keyframes btn-glow{0%,100%{box-shadow:0 0 8px rgba(255,0,0,.3)}50%{box-shadow:0 0 20px rgba(255,0,0,.6)}}
+.btn-chaos:hover{box-shadow:0 0 30px rgba(255,0,0,.8);background:rgba(255,0,0,.1)}
+.btn-chaos:active{background:rgba(255,0,0,.3);border-color:#fff;color:#fff}
+#entropy-display{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:#ff4444;opacity:0;transition:opacity .3s;background:rgba(20,5,5,.6);border:1px solid rgba(255,0,0,.3);padding:.75rem;border-radius:2px;width:100%;max-width:640px;white-space:pre;overflow-x:auto;pointer-events:auto;line-height:1.5}
+.warn-badge{display:inline-block;padding:2px 8px;border:1px solid #ff0000;color:#ff0000;font-family:'Share Tech Mono',monospace;font-size:.6rem;letter-spacing:.1em;border-radius:2px;animation:warn-blink 1s step-end infinite}
+@keyframes warn-blink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes alarm-flash{0%,100%{box-shadow:inset 0 0 0 0 transparent}50%{box-shadow:inset 0 0 120px 20px rgba(255,0,0,.3)}}
+.alarm{animation:alarm-flash .6s infinite}
+</style>
+</head>
+<body>
+<div id="canvas-container"></div>
+<div class="scanlines"></div>
+<div class="corner corner-tl"></div><div class="corner corner-tr"></div>
+<div class="corner corner-bl"></div><div class="corner corner-br"></div>
+<div class="instability-container"><div id="instability-bar"></div></div>
+
+<div id="main-interface">
+  <header class="flex justify-between items-center w-full max-w-7xl mx-auto pointer-events-auto gap-2">
+    <a href="../../" class="text-xl font-bold tracking-widest text-red-400 font-mono hover:text-red-300 transition-colors">← 0API <span class="text-fuchsia-500">//</span> MONSTER</a>
+    <div class="inline-flex items-center gap-2 px-3 py-1 border border-red-500/50 bg-red-900/20 text-xs font-mono tracking-widest rounded-sm shrink-0">
+      <span class="warn-badge">⚠ UNSTABLE</span>
+    </div>
+  </header>
+
+  <main class="flex-1 flex flex-col justify-center w-full max-w-4xl mx-auto px-2 md:px-4 pointer-events-auto z-20 py-6 gap-6" id="main-content">
+    <div class="text-center">
+      <h1 id="chaos-title" class="glitch-text text-white font-bold tracking-widest" style="font-size:clamp(1.8rem,8vw,3.5rem)">
+        /v0/<span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-fuchsia-600">chaos</span>
+      </h1>
+      <p class="text-gray-400 font-mono mt-2 text-xs">Manipulação Direta do Tecido do Sistema &bull; USE COM CAUTELA</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="glass-panel info-card p-4 relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-0.5 bg-red-500 animate-pulse"></div>
+        <h3 class="font-mono text-red-300 text-sm mb-1">POST /inject</h3>
+        <p class="text-xs text-gray-400">Injeta entropia diretamente no pipeline de dados.</p>
+        <div class="mt-3 font-mono text-[10px] text-gray-500 border-t border-gray-800 pt-2 flex justify-between">
+          <span>LATENCY: ERR</span><span class="text-red-400 animate-pulse">UNSTABLE</span>
+        </div>
+      </div>
+      <div class="glass-panel info-card p-4 relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-0.5 bg-fuchsia-500 animate-pulse"></div>
+        <h3 class="font-mono text-fuchsia-300 text-sm mb-1">POST /mutate</h3>
+        <p class="text-xs text-gray-400">Altera parâmetros de inferência em tempo de execução.</p>
+        <div class="mt-3 font-mono text-[10px] text-gray-500 border-t border-gray-800 pt-2 flex justify-between">
+          <span>LATENCY: ∞</span><span class="text-fuchsia-400 animate-pulse">UNSTABLE</span>
+        </div>
+      </div>
+      <div class="glass-panel info-card p-4 relative overflow-hidden border-red-500/40">
+        <div class="absolute top-0 left-0 w-full h-0.5 bg-red-700 animate-ping"></div>
+        <h3 class="font-mono text-red-400 text-sm mb-1">/override</h3>
+        <p class="text-xs text-gray-400">Acesso root ao núcleo do sistema. Sem rollback.</p>
+        <div class="mt-3 font-mono text-[10px] text-gray-500 border-t border-gray-800 pt-2 flex justify-between">
+          <span>LATENCY: MAX</span><span class="text-red-500 animate-pulse">CRITICAL</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="glass-panel p-5 flex flex-col gap-4 max-w-lg w-full mx-auto">
+      <div class="flex items-center justify-between">
+        <p class="text-xs font-mono text-red-400 tracking-widest">// CHAOS ENGINE — INJECT ENTROPY</p>
+        <span class="warn-badge">ROOT</span>
+      </div>
+      <p class="text-xs text-gray-500 font-mono leading-relaxed">Este endpoint manipula diretamente o tecido do sistema.<br>Resultados são não-determinísticos. Sem garantia de idempotência.</p>
+      <button class="btn-chaos" id="chaos-btn">⚡ INJECT CHAOS</button>
+      <div id="entropy-display"></div>
+    </div>
+  </main>
+
+  <footer class="text-xs text-gray-500 font-mono w-full max-w-7xl mx-auto pointer-events-auto">
+    <div class="flex justify-between">
+      <span>ENDPOINT: /v0/chaos &bull; LATENCY: ERR &bull; REQ: MAX &bull; STATUS: UNSTABLE</span>
+      <span>0API.MONSTER V2.0.4</span>
+    </div>
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const scene=new THREE.Scene();
+scene.fog=new THREE.FogExp2(0x110000,.04);
+const camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,100);
+camera.position.set(0,1.5,11);
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+renderer.setSize(innerWidth,innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+document.getElementById('canvas-container').appendChild(renderer.domElement);
+const N=4000,pGeo=new THREE.BufferGeometry();
+const pPos=new Float32Array(N*3),pCol=new Float32Array(N*3);
+for(let i=0;i<N;i++){pPos[i*3]=(Math.random()-.5)*30;pPos[i*3+1]=(Math.random()-.5)*30;pPos[i*3+2]=(Math.random()-.5)*30;
+const r=Math.random();
+if(r>.66){pCol[i*3]=1;pCol[i*3+1]=0;pCol[i*3+2]=0;}else if(r>.33){pCol[i*3]=1;pCol[i*3+1]=0;pCol[i*3+2]=1;}else{pCol[i*3]=1;pCol[i*3+1]=.3;pCol[i*3+2]=0;}}
+pGeo.setAttribute('position',new THREE.BufferAttribute(pPos,3));
+pGeo.setAttribute('color',new THREE.BufferAttribute(pCol,3));
+const pMat=new THREE.PointsMaterial({size:.07,vertexColors:true,transparent:true,opacity:.8});
+const pts=new THREE.Points(pGeo,pMat);scene.add(pts);
+const shapes=[];
+for(let i=0;i<5;i++){const g=new THREE.IcosahedronGeometry(1+i*.6,1);const m=new THREE.MeshBasicMaterial({color:i%2?0xff0000:0xff00ff,wireframe:true,transparent:true,opacity:.06-i*.01});const mesh=new THREE.Mesh(g,m);shapes.push(mesh);scene.add(mesh);}
+const grid=new THREE.GridHelper(50,35,0xff0000,0x1a0000);
+grid.position.y=-6;grid.material.transparent=true;grid.material.opacity=.2;scene.add(grid);
+window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+let chaos=0;
+(function loop(){requestAnimationFrame(loop);pts.rotation.y+=.001+chaos*.003;pts.rotation.x+=.0005+chaos*.002;shapes.forEach((s,i)=>{s.rotation.x+=(.003+chaos*.01)*(i%2?1:-1);s.rotation.y+=(.002+chaos*.008)*((i+1)%2?1:-1);s.rotation.z+=.001*i;});grid.rotation.y+=.003;if(chaos>0)chaos-=.01;renderer.render(scene,camera);})();
+
+const Z=['\u0300','\u0301','\u030d','\u030e','\u0315','\u0316','\u0317','\u031b','\u0342'];
+function zalgify(s){return[...s].map(c=>{let r=c;if(Math.random()>.4)r+=Z[Math.random()*Z.length|0];if(Math.random()>.7)r+=Z[Math.random()*Z.length|0];return r;}).join('');}
+
+const logs=[
+  '> INJECT entropy_seed=0xDEADBEEF\n> chaos_level=CRITICAL\n> injecting into pipeline...\n> WARNING: non-deterministic path activated\n> entropy_vector: [0.9823, -0.4421, 1.1102, ...]\n> system_fabric: DESTABILIZED',
+  '> MUTATE params={temp:2.0, top_p:0.0, chaos:MAX}\n> model_weights: CORRUPTED\n> attention_mask: SHATTERED\n> hallucination_rate: 94.2%\n> context_window: OVERFLOWED',
+  '> OVERRIDE auth=root level=kernel\n> WARNING: NO ROLLBACK AVAILABLE\n> core_modules: BYPASSED\n> safety_rails: DISABLED\n> system_state: UNDEFINED'
+];
+
+document.getElementById('chaos-btn').addEventListener('click',()=>{
+  chaos=1;
+  const mc=document.getElementById('main-content');
+  mc.classList.add('alarm');
+  setTimeout(()=>mc.classList.remove('alarm'),1200);
+  const ed=document.getElementById('entropy-display');
+  ed.style.opacity='1';
+  ed.textContent='';
+  const log=logs[Math.random()*logs.length|0];
+  let i=0;
+  const iv=setInterval(()=>{
+    if(i>=log.length){clearInterval(iv);ed.textContent=log;return;}
+    ed.textContent=zalgify(log.slice(0,i+1));
+    i+=Math.random()>.6?2:1;
+  },20);
+});
+</script>
+</body>
+</html>
